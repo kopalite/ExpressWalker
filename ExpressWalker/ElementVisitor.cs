@@ -11,6 +11,8 @@ namespace ExpressWalker
 
         string ElementName { get; }
 
+        object Extract(object parent);
+
         void Visit(object element);
     }
 
@@ -25,24 +27,64 @@ namespace ExpressWalker
 
         public string ElementName { get; }
 
+        public ExpressAccessor ElementAccessor { get; } 
+
         private HashSet<IElementVisitor> ElementVisitors { get; }
 
         private HashSet<IPropertyVisitor<TElement>> PropertyVisitors { get; }
 
-        public ElementVisitor(string elementName) : base()
-        {
-            ElementName = elementName;
-
-            ElementVisitors = new HashSet<IElementVisitor>();
-
-            PropertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
-        }
-
-        public ElementVisitor() : this("Root")
+        public ElementVisitor(Type ownerType) : this(ownerType, null)
         {
             
         }
 
+        public ElementVisitor(Type ownerType, string elementName) 
+        {
+            ElementVisitors = new HashSet<IElementVisitor>();
+
+            PropertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
+
+            ElementName = elementName;
+
+            if (!string.IsNullOrWhiteSpace(elementName))
+            {
+                ElementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
+            }
+        }
+
+        public object Extract(object parent)
+        {
+            return ElementAccessor.Get(parent);
+        }
+
+        public void Visit(TElement element)
+        {
+            foreach (var propertyVisitor in PropertyVisitors)
+            {
+                propertyVisitor.Visit(element);
+            }
+
+            foreach (var elementVisitor in ElementVisitors)
+            {
+                var childElement = elementVisitor.Extract(element);
+
+                elementVisitor.Visit(childElement);
+            }
+        }
+
+        public void Visit(object element)
+        {
+            if (element == null || !(element is TElement))
+            {
+                return;
+            }
+
+            Visit((TElement)element);
+        }
+    }
+
+    internal partial class ElementVisitor<TElement>
+    {
         public IElementVisitor<TChildElement> AddElementVisitor<TChildElement>(string elementName)
         {
             if (ElementVisitors.Any(ev => ev.ElementType == typeof(TChildElement) && ev.ElementName == elementName))
@@ -50,7 +92,7 @@ namespace ExpressWalker
                 throw new ArgumentException(string.Format("Element visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), elementName));
             }
 
-            var elementVisitor = new ElementVisitor<TChildElement>(elementName);
+            var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), elementName);
             ElementVisitors.Add(elementVisitor);
             return elementVisitor;
         }
@@ -65,31 +107,6 @@ namespace ExpressWalker
             var elementVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, newValue);
             PropertyVisitors.Add(elementVisitor);
             return this;
-        }
-
-        public void Visit(TElement element)
-        {
-            foreach (var propertyVisitor in PropertyVisitors)
-            {
-                propertyVisitor.Visit(element);
-            }
-
-            //TODO: Extract element values and pass them to element visitors
-
-            foreach (var elementVisitor in ElementVisitors)
-            {
-                elementVisitor.Visit(element);
-            }
-        }
-
-        public void Visit(object element)
-        {
-            if (element == null || !(element is TElement))
-            {
-                return;
-            }
-
-            Visit((TElement)element);
         }
     }
 }

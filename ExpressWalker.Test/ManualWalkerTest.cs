@@ -8,24 +8,20 @@ namespace ExpressWalker.Test
     public class ManualWalkerTest
     {
         [TestMethod]
-        public void WalkerLiquid_Visit()
+        public void ManualWalker_Visit()
         {
-            var walker = GetWalker();
-            var sample = GetSample();
-            walker.Visit(sample);
-        }
+            //Arrange
 
-        private IElementVisitor<A1> GetWalker()
-        {
-            return ManualWalker.Create<A1>()
-                                    .Property<A1, string>(a1 => a1.A1Date, va1 => va1 + "Test1")
-                                    .Property<A1, int>(a1 => a1.A1Amount, va1 => va1 * 3)
-                                    .Element<A1, B1>(a1 => a1.B1, b1 =>
-                                            b1.Property<B1, string>(x => x.B1Name, vb1 => vb1 + "Test2")
-                                              .Element<B1, C1>(b11 => b11.C1, c1 =>
-                                                  c1.Property<C1, DateTime>(x => x.C1Date, vc1 => vc1.AddYears(10))))
-                                    .Element<A1, B2>(a1 => a1.B2, b2 => b2
-                                        .Property<B2, DateTime>(x => x.B2Date, vb2 => vb2.AddYears(10)));
+            var sample = GetSample();
+
+            //Act
+
+            var walker = GetWalker();
+            walker.Visit(sample);
+
+            //Assert
+
+            Assert.IsTrue(IsCorrect(sample));
         }
 
         private A1 GetSample()
@@ -49,6 +45,30 @@ namespace ExpressWalker.Test
                 }
             };
         }
+
+        private IElementVisitor<A1> GetWalker()
+        {
+            return ManualWalker.Create<A1>()
+                                    .Property<A1, DateTime>(a1 => a1.A1Date, va1 => va1.AddYears(10))
+                                    .Property<A1, int>(a1 => a1.A1Amount, va1 => va1 * 3)
+                                    .Element<A1, B1>(a1 => a1.B1, b1 =>
+                                            b1.Property<B1, string>(x => x.B1Name, vb1 => vb1 + "Test2")
+                                              .Element<B1, C1>(b11 => b11.C1, c1 =>
+                                                  c1.Property<C1, DateTime>(x => x.C1Date, vc1 => vc1.AddYears(10))))
+                                    .Element<A1, B2>(a1 => a1.B2, b2 => b2
+                                        .Property<B2, DateTime>(x => x.B2Date, vb2 => vb2.AddYears(10)));
+        }
+
+        private bool IsCorrect(A1 a1)
+        {
+            var tenYearsAfter = DateTime.Now.Year + 10;
+            return a1.A1Date.Year == tenYearsAfter &&
+                   a1.A1Amount == 102 &&
+                   a1.B1.B1Name == "TestB1Test2" &&
+                   a1.B1.C1.C1Date.Year == tenYearsAfter &&
+                   a1.B2.B2Date.Year == tenYearsAfter;
+        }
+
     }
 
     public class A1

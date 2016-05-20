@@ -8,7 +8,7 @@ namespace ExpressWalker
     {
         public static IElementVisitor<TElement> Create<TElement>() where TElement : class
         {
-            return new ElementVisitor<TElement>();
+            return new ElementVisitor<TElement>(typeof(TElement));
         }
 
         public static IElementVisitor<TElement> Element<TElement, TChildElement>(this IElementVisitor<TElement> element,

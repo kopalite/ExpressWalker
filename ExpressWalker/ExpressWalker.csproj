@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExpressAccessor.cs" />
     <Compile Include="PropertyVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ElementVisitor.cs" />

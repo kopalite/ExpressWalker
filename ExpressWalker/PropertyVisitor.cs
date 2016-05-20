@@ -25,11 +25,15 @@ namespace ExpressWalker
 
         public string PropertyName { get; }
 
+        public ExpressAccessor PropertyAccessor { get; }
+
         private Func<TProperty, TProperty> _getNewValue;
 
         internal PropertyVisitor(string propertyName, Expression<Func<TProperty, TProperty>> getNewValue)
         {
             PropertyName = propertyName;
+
+            PropertyAccessor = ExpressAccessor.Create(typeof(TElement), typeof(TProperty), propertyName);
 
             if (getNewValue != null)
             {
@@ -39,7 +43,12 @@ namespace ExpressWalker
         
         public void Visit(TElement element)
         {
-            
+            if (_getNewValue != null)
+            {
+                var currentValue = PropertyAccessor.Get(element);
+                var newValue = _getNewValue((TProperty)currentValue);
+                PropertyAccessor.Set(element, newValue);
+            }
         }
     }
 
