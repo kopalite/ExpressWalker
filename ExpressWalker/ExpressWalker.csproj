@@ -40,11 +40,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProxyWalker.cs" />
+    <Compile Include="[Exp].cs" />
     <Compile Include="ExpressAccessor.cs" />
     <Compile Include="PropertyVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ElementVisitor.cs" />
     <Compile Include="ManualWalker.cs" />
+    <Compile Include="TypeWalker.cs" />
+    <Compile Include="TypeWalkerTarget.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

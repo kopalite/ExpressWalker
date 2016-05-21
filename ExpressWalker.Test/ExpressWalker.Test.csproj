@@ -53,6 +53,8 @@
     <Compile Include="ExpressAccessorTest.cs" />
     <Compile Include="ManualWalkerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProxyWalkerTest.cs" />
+    <Compile Include="TypeWalkerTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExpressWalker\ExpressWalker.csproj">
