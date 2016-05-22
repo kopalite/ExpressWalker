@@ -38,6 +38,8 @@ namespace ExpressWalker.Test
                 }
             };
 
+            retVal.Child.Parent = retVal;
+
             return retVal;
         }
 
@@ -51,7 +53,7 @@ namespace ExpressWalker.Test
 
             var visitor = typeWalker.Build();
 
-            var proxyWalker = new ProxyWalker<Parent>(visitor, depth:2);
+            var proxyWalker = new ProxyWalker<Parent>(null, depth: 2);
 
             return proxyWalker;
         }
