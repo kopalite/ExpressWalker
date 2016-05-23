@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ExpressWalker
 {
@@ -49,6 +51,30 @@ namespace ExpressWalker
 
         private void Build(ElementVisitor visitor, int depth)
         {
+            if (depth > Depth)
+            {
+                return;
+            }
+
+            var currentNodeType = visitor.ElementType;
+
+            foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var propertyMatch = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name);
+                if (propertyMatch != null)
+                {
+                    visitor.AddProperty(property.PropertyType, property.Name, propertyMatch.GetNewValue);
+                }
+
+                var elementMatch = _elements.FirstOrDefault(t => t.ElementType == property.PropertyType);
+                if (elementMatch != null)
+                {
+                    var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
+
+                    Build(childVisitor, depth + 1);
+                }
+            }
+
             //TODO: Build recursivelly a IElementVisitor<TRootType> using ElementVisitor methods - basing on:
 
             //1. TRootType type

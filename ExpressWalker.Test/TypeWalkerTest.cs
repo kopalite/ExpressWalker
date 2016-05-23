@@ -36,19 +36,24 @@ namespace ExpressWalker.Test
                     TestString1 = "aaa1",
                     TestInt1 = 10,
                     TestDate1 = DateTime.Now,
+                    Child1 = new Child()
                 }
             };
+
+            retVal.Child.Parent = retVal;
 
             return retVal;
         }
 
         public TypeWalker<Parent> GetWalker()
         {
-            return TypeWalker<Parent>.Create(depth: 2)
+            return TypeWalker<Parent>.Create(depth: 10)
                                      .ForProperty<Parent, int>(p => p.TestInt, x => x * x)
                                      .ForProperty<Parent, string>(p => p.TestString, x => x + x)
                                      .ForElement<Child>()
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => x.AddYears(10));
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => x.AddYears(10))
+                                     .ForProperty<Child, Parent>(p => p.Parent, x => null)
+                                     .ForProperty<Child, Child>(p => p.Child1, x => null);
         }
 
         private bool IsCorrect(Parent parent)
@@ -81,5 +86,7 @@ namespace ExpressWalker.Test
         //For testing circular references.
 
         public virtual Parent Parent { get; set; }
+
+        public Child Child1 { get; set; }
     }
 }

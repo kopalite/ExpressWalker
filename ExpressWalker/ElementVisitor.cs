@@ -31,8 +31,8 @@ namespace ExpressWalker
 
         public abstract ElementVisitor AddElement(Type elementType, string elementName);
 
-        //getNewValue is convertible to Func<TPropertyType, TPropertyType> where TPropertyType is specified in derived class.
-        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, object getNewValue);
+        //getNewValue is convertible to Expression<Func<TPropertyType, TPropertyType>> where TPropertyType is specified in derived class.
+        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue);
     }
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement>
@@ -109,7 +109,7 @@ namespace ExpressWalker
 
         public override ElementVisitor AddElement(Type elementType, string elementName)
         {
-            var methodDef = typeof(ElementVisitor<>).GetMethod("AddElementVisitor");
+            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddElementVisitor");
             var method = methodDef.MakeGenericMethod(elementType);
             var visitor = (ElementVisitor)method.Invoke(this, new[] { elementName });
             return visitor;
@@ -127,11 +127,11 @@ namespace ExpressWalker
             return this;
         }
 
-        public override ElementVisitor AddProperty(Type propertyType, string propertyName, object getNewValue)
+        public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue)
         {
-            var methodDef = typeof(ElementVisitor<>).GetMethod("AddPropertyVisitor");
+            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor");
             var method = methodDef.MakeGenericMethod(propertyType);
-            var visitor = (ElementVisitor)method.Invoke(this, new[] { propertyName, getNewValue });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getNewValue });
             return visitor;
         }
     }

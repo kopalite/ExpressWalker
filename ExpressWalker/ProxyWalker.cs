@@ -37,10 +37,6 @@ namespace ExpressWalker
         {
             TypeAdapterConfig.GlobalSettings.Default.Settings.PreserveReference = true;
             return TypeAdapter.Adapt<TRootType>(@object);
-
-            //var config = TypeAdapterConfig<TRootType, TRootType>.NewConfig().PreserveReference(true);
-            //return config.BuildAdapter().Adapt(@object);
-            
         }
     }
 }

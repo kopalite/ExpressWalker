@@ -20,7 +20,7 @@ namespace ExpressWalker
         public string PropertyName { get; }
         
         // An object convertible to Func<TPropertyType, TPropertyType> where TPropertyType is specified in derived class.
-        public abstract object GetNewValue { get; }
+        public abstract Expression GetNewValue { get; }
 
         public PropertyTarget(Type elementType, string propertyName)
         {
@@ -32,13 +32,13 @@ namespace ExpressWalker
 
     internal class PropertyTarget<TPropertyType> : PropertyTarget
     {
-        public override object GetNewValue { get; }
+        public override Expression GetNewValue { get; }
 
         public PropertyTarget(Type elementType,  
                               string propertyName, 
                               Expression<Func<TPropertyType, TPropertyType>> getNewValue) : base(elementType, propertyName)
         {
-            GetNewValue = getNewValue.Compile();
+            GetNewValue = getNewValue;
         }
     }
 }
