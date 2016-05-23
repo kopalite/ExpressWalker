@@ -50,12 +50,6 @@
     <Compile Include="TypeWalker.cs" />
     <Compile Include="TypeWalkerTarget.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Mapster\src\Mapster\Mapster.csproj">
-      <Project>{994a64a1-c542-4b4a-a4d6-4cc93a8b59ba}</Project>
-      <Name>Mapster</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

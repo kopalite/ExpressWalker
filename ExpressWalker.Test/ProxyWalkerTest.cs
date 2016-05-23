@@ -45,7 +45,7 @@ namespace ExpressWalker.Test
 
         public ProxyWalker<Parent> GetWalker()
         {
-            var typeWalker = TypeWalker<Parent>.Create(depth: 2)
+            var typeWalker = TypeWalker<Parent>.Create()
                                      .ForProperty<Parent, int>(p => p.TestInt, x => x * x)
                                      .ForProperty<Parent, string>(p => p.TestString, x => x + x)
                                      .ForElement<Child>()

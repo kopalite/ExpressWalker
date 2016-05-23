@@ -36,8 +36,8 @@ namespace ExpressWalker.Test
                     TestString1 = "aaa1",
                     TestInt1 = 10,
                     TestDate1 = DateTime.Now,
-                    Child1 = new Child()
-                }
+                    
+                },
             };
 
             retVal.Child.Parent = retVal;
@@ -47,13 +47,11 @@ namespace ExpressWalker.Test
 
         public TypeWalker<Parent> GetWalker()
         {
-            return TypeWalker<Parent>.Create(depth: 10)
+            return TypeWalker<Parent>.Create()
                                      .ForProperty<Parent, int>(p => p.TestInt, x => x * x)
                                      .ForProperty<Parent, string>(p => p.TestString, x => x + x)
                                      .ForElement<Child>()
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => x.AddYears(10))
-                                     .ForProperty<Child, Parent>(p => p.Parent, x => null)
-                                     .ForProperty<Child, Child>(p => p.Child1, x => null);
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => x.AddYears(10));
         }
 
         private bool IsCorrect(Parent parent)
@@ -87,6 +85,6 @@ namespace ExpressWalker.Test
 
         public virtual Parent Parent { get; set; }
 
-        public Child Child1 { get; set; }
+        
     }
 }

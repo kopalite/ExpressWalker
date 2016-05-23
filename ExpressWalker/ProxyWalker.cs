@@ -1,6 +1,4 @@
-﻿using Mapster;
-
-namespace ExpressWalker
+﻿namespace ExpressWalker
 {
     public class ProxyWalker<TRootType>
     {
@@ -35,8 +33,9 @@ namespace ExpressWalker
 
         private TRootType Clone(TRootType @object)
         {
-            TypeAdapterConfig.GlobalSettings.Default.Settings.PreserveReference = true;
-            return TypeAdapter.Adapt<TRootType>(@object);
+            return default(TRootType);
+            //TypeAdapterConfig.GlobalSettings.Default.Settings.PreserveReference = true;
+            //return TypeAdapter.Adapt<TRootType>(@object);
         }
     }
 }

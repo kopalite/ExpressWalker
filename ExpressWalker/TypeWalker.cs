@@ -8,24 +8,20 @@ namespace ExpressWalker
 {
     public class TypeWalker<TRootType>
     {
-        public int Depth { get; }
-
         private List<ElementTarget> _elements;
 
         private List<PropertyTarget> _properties;
 
-        private TypeWalker(int depth)
+        private TypeWalker()
         {
-            Depth = depth;
-
             _elements = new List<ElementTarget>();
 
             _properties = new List<PropertyTarget>();
         }
 
-        public static TypeWalker<TRootType> Create(int depth)
+        public static TypeWalker<TRootType> Create()
         {
-            return new TypeWalker<TRootType>(depth);
+            return new TypeWalker<TRootType>();
         }
 
         public TypeWalker<TRootType> ForElement<TElementType>()
@@ -49,11 +45,13 @@ namespace ExpressWalker
             return visitor;
         }
 
+        private int depth;
+
         private void Build(ElementVisitor visitor, int depth)
         {
-            if (depth > Depth)
+            if (depth == 1000)
             {
-                return;
+                throw new Exception("There is a circular references by type between properties!");
             }
 
             var currentNodeType = visitor.ElementType;
