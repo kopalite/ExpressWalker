@@ -10,10 +10,12 @@ namespace ExpressWalker
         Type ElementType { get; }
 
         string ElementName { get; }
-
+        
         object Extract(object parent);
 
-        void Visit(object element);
+        object SetCopy(object parent, object element);
+
+        void Visit(object element, object blueprint);
     }
 
     public interface IElementVisitor<TElement> : IElementVisitor
@@ -23,11 +25,13 @@ namespace ExpressWalker
 
     internal abstract class ElementVisitor
     {
+       
+
         public abstract Type ElementType { get; }
 
         public string ElementName { get; protected set; }
 
-        public ExpressAccessor ElementAccessor { get; protected set; }
+        
 
         public abstract ElementVisitor AddElement(Type elementType, string elementName);
 
@@ -37,6 +41,10 @@ namespace ExpressWalker
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement>
     {
+        private ExpressAccessor _elementAccessor;
+
+        private ShallowCloner<TElement> _elementCloner;
+
         public override Type ElementType { get { return typeof(TElement); } }
 
         private HashSet<IElementVisitor> ElementVisitors { get; }
@@ -55,41 +63,58 @@ namespace ExpressWalker
             PropertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
 
             ElementName = elementName;
-
             if (!string.IsNullOrWhiteSpace(elementName))
             {
-                ElementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
+                _elementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
             }
+
+            _elementCloner = new ShallowCloner<TElement>();
         }
 
         public object Extract(object parent)
         {
-            return ElementAccessor.Get(parent);
+            return _elementAccessor.Get(parent);
         }
 
-        public void Visit(TElement element)
+        public object SetCopy(object parent, object element)
+        {
+            var blueprint = _elementCloner.Clone((TElement)element);
+
+            _elementAccessor.Set(parent, blueprint);
+
+            return blueprint;
+        }
+
+        public void Visit(TElement element, TElement blueprint)
         {
             foreach (var propertyVisitor in PropertyVisitors)
             {
-                propertyVisitor.Visit(element);
+                propertyVisitor.Visit(element, blueprint);
             }
 
             foreach (var elementVisitor in ElementVisitors)
             {
                 var childElement = elementVisitor.Extract(element);
 
-                elementVisitor.Visit(childElement);
+                var childBlueprint = elementVisitor.SetCopy(blueprint, childElement);
+
+                elementVisitor.Visit(childElement, childBlueprint);
             }
         }
 
-        public void Visit(object element)
+        public void Visit(object element, object blueprint)
         {
-            if (element == null || !(element is TElement))
+            if (element == null)
             {
                 return;
             }
 
-            Visit((TElement)element);
+            if (!(element is TElement && blueprint is TElement))
+            {
+                throw new Exception(string.Format("Given element and blueprint must be of type '{0}'", typeof(TElement).ToString()));
+            }
+
+            Visit((TElement)element, (TElement)blueprint);
         }
     }
 

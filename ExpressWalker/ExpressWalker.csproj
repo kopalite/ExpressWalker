@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ProxyWalker.cs" />
+    <Compile Include="ShallowCloner.cs" />
     <Compile Include="[Exp].cs" />
     <Compile Include="ExpressAccessor.cs" />
     <Compile Include="PropertyVisitor.cs" />

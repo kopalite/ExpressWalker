@@ -11,7 +11,7 @@ namespace ExpressWalker
 
         string PropertyName { get; }
         
-        void Visit(TElement element);
+        void Visit(TElement element, TElement blueprint);
     }
 
     internal class PropertyVisitor<TElement>
@@ -25,7 +25,7 @@ namespace ExpressWalker
 
         public string PropertyName { get; }
 
-        public ExpressAccessor PropertyAccessor { get; }
+        private ExpressAccessor _propertyAccessor;
 
         private Func<TProperty, TProperty> _getNewValue;
 
@@ -33,7 +33,7 @@ namespace ExpressWalker
         {
             PropertyName = propertyName;
 
-            PropertyAccessor = ExpressAccessor.Create(typeof(TElement), typeof(TProperty), propertyName);
+            _propertyAccessor = ExpressAccessor.Create(typeof(TElement), typeof(TProperty), propertyName);
 
             if (getNewValue != null)
             {
@@ -41,13 +41,14 @@ namespace ExpressWalker
             }
         }
         
-        public void Visit(TElement element)
+        public void Visit(TElement element, TElement blueprint)
         {
             if (_getNewValue != null)
             {
-                var currentValue = PropertyAccessor.Get(element);
+                var currentValue = _propertyAccessor.Get(element);
                 var newValue = _getNewValue((TProperty)currentValue);
-                PropertyAccessor.Set(element, newValue);
+                _propertyAccessor.Set(element, newValue);
+                _propertyAccessor.Set(blueprint, newValue);
             }
         }
     }

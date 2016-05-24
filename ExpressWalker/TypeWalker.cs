@@ -45,8 +45,6 @@ namespace ExpressWalker
             return visitor;
         }
 
-        private int depth;
-
         private void Build(ElementVisitor visitor, int depth)
         {
             if (depth == 1000)
