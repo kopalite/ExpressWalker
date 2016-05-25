@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ShallowCloner.cs" />
-    <Compile Include="[Exp].cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="ExpressAccessor.cs" />
     <Compile Include="PropertyVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

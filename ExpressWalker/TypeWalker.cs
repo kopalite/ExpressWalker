@@ -34,7 +34,7 @@ namespace ExpressWalker
         public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
                                                                               Expression<Func<TPropertyType, TPropertyType>> getNewValue)
         {
-            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), Exp.NameOf(propertyName), getNewValue));
+            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), Util.NameOf(propertyName), getNewValue));
 
             return this;
         }
