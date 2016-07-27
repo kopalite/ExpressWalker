@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Linq.Expressions;
 
 namespace ExpressWalker.Test
 {
@@ -7,7 +8,7 @@ namespace ExpressWalker.Test
     public class TypeWalkerTest
     {
         [TestMethod]
-        public void TypeWalker_Build()
+        public void TypeWalker_Visit()
         {
             //Arrange
 
@@ -32,12 +33,13 @@ namespace ExpressWalker.Test
                 TestString = "aaa",
                 TestInt = 10,
                 TestDate = DateTime.Now,
+                CommonType1 = new CommonType { CommonString = "brlj" },
                 Child = new Child
                 {
                     TestString1 = "aaa1",
                     TestInt1 = 10,
                     TestDate1 = DateTime.Now,
-                    
+                    CommonType1 = new CommonType { CommonString = "njanja" }
                 },
             };
 
@@ -49,17 +51,44 @@ namespace ExpressWalker.Test
         public TypeWalker<Parent> GetWalker()
         {
             return TypeWalker<Parent>.Create()
-                                     .ForProperty<Parent, int>(p => p.TestInt, x => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, x => x + x)
+                                     .ForProperty<Parent, int>(p => p.TestInt, null, x => x * x)
+                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), x => x + x)
                                      .ForElement<Child>()
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => x.AddYears(10));
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), x => x.AddYears(10))
+                                     .ForProperty<CommonType>(x => Foo(x), p => new CommonType { CommonString = "..." });
+        }
+
+        private int _counter;
+
+        private void Foo(DateTime input)
+        {
+            _counter++;
+        }
+
+        private void Foo(int input)
+        {
+            _counter++;
+        }
+
+        private void Foo(string input)
+        {
+            _counter++;
+        }
+
+        private void Foo(CommonType input)
+        {
+            _counter++;
         }
 
         private bool IsCorrect(Parent parent)
         {
-            return parent.TestInt == 100 && 
-                   parent.TestString == "aaaaaa" && 
-                   parent.Child.TestDate1.Year == DateTime.Now.Year + 10;
+            return parent.TestInt == 100 &&
+                   parent.TestString == "aaaaaa" &&
+                   parent.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   parent.CommonType1.CommonString == "..." &&
+                   parent.Child.CommonType1.CommonString == "..." &&
+                   _counter == 4;
+
         }
     }
 
@@ -72,6 +101,8 @@ namespace ExpressWalker.Test
         public DateTime TestDate { get; set; }
 
         public virtual Child Child { get; set; }
+
+        public CommonType CommonType1 { get; set; }
     }
 
     public class Child
@@ -86,6 +117,12 @@ namespace ExpressWalker.Test
 
         public virtual Parent Parent { get; set; }
 
-        
+        public CommonType CommonType1 { get; set; }
+    }
+
+    public class CommonType
+    {
+        public string CommonString { get; set; }
+
     }
 }

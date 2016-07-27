@@ -27,13 +27,20 @@ namespace ExpressWalker
 
         private ExpressAccessor _propertyAccessor;
 
-        private Func<TProperty, TProperty> _getNewValue;
+        private Action<TProperty> _getOldValue;
 
-        internal PropertyVisitor(string propertyName, Expression<Func<TProperty, TProperty>> getNewValue)
+        private Func<TProperty, TProperty> _getNewValue;
+        
+        internal PropertyVisitor(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, TProperty>> getNewValue)
         {
             PropertyName = propertyName;
 
             _propertyAccessor = ExpressAccessor.Create(typeof(TElement), typeof(TProperty), propertyName);
+
+            if (getOldValue != null)
+            {
+                _getOldValue = getOldValue.Compile();
+            }
 
             if (getNewValue != null)
             {
@@ -43,6 +50,12 @@ namespace ExpressWalker
         
         public void Visit(TElement element, TElement blueprint)
         {
+            if (_getOldValue != null)
+            {
+                var currentValue = _propertyAccessor.Get(element);
+                _getOldValue((TProperty)currentValue);
+            }
+
             if (_getNewValue != null)
             {
                 var currentValue = _propertyAccessor.Get(element);

@@ -25,18 +25,14 @@ namespace ExpressWalker
 
     internal abstract class ElementVisitor
     {
-       
-
         public abstract Type ElementType { get; }
 
         public string ElementName { get; protected set; }
 
-        
-
         public abstract ElementVisitor AddElement(Type elementType, string elementName);
 
         //getNewValue is convertible to Expression<Func<TPropertyType, TPropertyType>> where TPropertyType is specified in derived class.
-        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue);
+        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getOldValue, Expression getNewValue);
     }
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement>
@@ -140,23 +136,23 @@ namespace ExpressWalker
             return visitor;
         }
 
-        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Func<TProperty, TProperty>> getNewValue)
+        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, TProperty>> getNewValue)
         {
             if (PropertyVisitors.Any(pv => pv.ElementType == typeof(TElement) && pv.PropertyName == propertyName))
             {
                 throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), propertyName));
             }
 
-            var elementVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getNewValue);
+            var elementVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue);
             PropertyVisitors.Add(elementVisitor);
             return this;
         }
 
-        public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue)
+        public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getOldValue, Expression getNewValue)
         {
             var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor");
             var method = methodDef.MakeGenericMethod(propertyType);
-            var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getNewValue });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getOldValue, getNewValue });
             return visitor;
         }
     }

@@ -18,26 +18,34 @@ namespace ExpressWalker
         public Type ElementType { get; }
 
         public string PropertyName { get; }
-        
-        // An object convertible to Func<TPropertyType, TPropertyType> where TPropertyType is specified in derived class.
-        public abstract Expression GetNewValue { get; }
 
-        public PropertyTarget(Type elementType, string propertyName)
+        public Type PropertyType { get; }
+
+        // An object convertible to Func<TPropertyType, TPropertyType> where TPropertyType is specified in derived class.
+        public Expression GetOldValue { get; protected set; }
+
+        // An object convertible to Action<TPropertyType> where TPropertyType is specified in derived class.
+        public Expression GetNewValue { get; protected set; }
+
+        public PropertyTarget(Type elementType, Type propertyType, string propertyName)
         {
             ElementType = elementType;
-
+            PropertyType = propertyType;
             PropertyName = propertyName;
         }
     }
 
     internal class PropertyTarget<TPropertyType> : PropertyTarget
     {
-        public override Expression GetNewValue { get; }
 
-        public PropertyTarget(Type elementType,  
-                              string propertyName, 
-                              Expression<Func<TPropertyType, TPropertyType>> getNewValue) : base(elementType, propertyName)
+        public PropertyTarget(Type elementType,
+                              Type propertyType,
+                              string propertyName,
+                              Expression<Action<TPropertyType>> getOldValue,
+                              Expression<Func<TPropertyType, TPropertyType>> getNewValue) 
+            : base(elementType, propertyType, propertyName)
         {
+            GetOldValue = getOldValue;
             GetNewValue = getNewValue;
         }
     }

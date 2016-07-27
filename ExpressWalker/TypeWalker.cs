@@ -31,13 +31,23 @@ namespace ExpressWalker
             return this;
         }
 
-        public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
-                                                                              Expression<Func<TPropertyType, TPropertyType>> getNewValue)
+        public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType>> getOldValue,
+                                                                Expression<Func<TPropertyType, TPropertyType>> getNewValue)
         {
-            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), Exp.NameOf(propertyName), getNewValue));
+            _properties.Add(new PropertyTarget<TPropertyType>(null, typeof(TPropertyType), null, getOldValue, getNewValue));
 
             return this;
         }
+
+        public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
+                                                                              Expression<Action<TPropertyType>> getOldValue,
+                                                                              Expression<Func<TPropertyType, TPropertyType>> getNewValue)
+        {
+            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Exp.NameOf(propertyName), getOldValue, getNewValue));
+
+            return this;
+        }
+
         public IElementVisitor<TRootType> Build()
         {
             var visitor = new ElementVisitor<TRootType>(null);
@@ -56,10 +66,16 @@ namespace ExpressWalker
 
             foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                var propertyMatch = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name);
-                if (propertyMatch != null)
+                var exactMatch = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name);
+                var typedMatch = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == property.PropertyType);
+
+                if (exactMatch != null)
                 {
-                    visitor.AddProperty(property.PropertyType, property.Name, propertyMatch.GetNewValue);
+                    visitor.AddProperty(property.PropertyType, property.Name, exactMatch.GetOldValue, exactMatch.GetNewValue);
+                }
+                else if (typedMatch != null)
+                {
+                    visitor.AddProperty(property.PropertyType, property.Name, typedMatch.GetOldValue, typedMatch.GetNewValue);
                 }
 
                 var elementMatch = _elements.FirstOrDefault(t => t.ElementType == property.PropertyType);
@@ -70,14 +86,6 @@ namespace ExpressWalker
                     Build(childVisitor, depth + 1);
                 }
             }
-
-            //TODO: Build recursivelly a IElementVisitor<TRootType> using ElementVisitor methods - basing on:
-
-            //1. TRootType type
-            //2. Elements list
-            //3. Properties list
-
-            //hint: use ElementVisitor abstract class non-generic methods: AddElement() and AddProperty() - they accept types :).
         }
     }
 }

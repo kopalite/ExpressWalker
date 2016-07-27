@@ -39,11 +39,12 @@ namespace ExpressWalker
 
         public static IElementVisitor<TElement> Property<TElement, TProperty>(this IElementVisitor<TElement> element,
                                                                               Expression<Func<TElement, object>> propertyName,
+                                                                              Expression<Action<TProperty>> getOldValue,
                                                                               Expression<Func<TProperty, TProperty>> getNewValue) where TElement : class
         {
             var myElement = (ElementVisitor<TElement>)element;
             var extractedName = Exp.NameOf(propertyName);
-            var childElement = myElement.AddPropertyVisitor(extractedName, getNewValue);
+            var childElement = myElement.AddPropertyVisitor(extractedName, getOldValue, getNewValue);
             return element;
         }
     }
