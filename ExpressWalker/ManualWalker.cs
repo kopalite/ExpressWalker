@@ -43,7 +43,7 @@ namespace ExpressWalker
                                                                               Expression<Func<TProperty, TProperty>> getNewValue) where TElement : class
         {
             var myElement = (ElementVisitor<TElement>)element;
-            var extractedName = Exp.NameOf(propertyName);
+            var extractedName = Util.NameOf(propertyName);
             var childElement = myElement.AddPropertyVisitor(extractedName, getOldValue, getNewValue);
             return element;
         }

@@ -43,7 +43,7 @@ namespace ExpressWalker
                                                                               Expression<Action<TPropertyType>> getOldValue,
                                                                               Expression<Func<TPropertyType, TPropertyType>> getNewValue)
         {
-            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Exp.NameOf(propertyName), getOldValue, getNewValue));
+            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Util.NameOf(propertyName), getOldValue, getNewValue));
 
             return this;
         }
