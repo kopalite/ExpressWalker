@@ -1,4 +1,4 @@
 # ExpressWalker
 ExpressWalker provides a generic way to examine and change any object graph in "Visitor Pattern" style. 
-The target nodes can be specified manually or by type. Very handy for "unproxy" scenarios in ORM mappers
-where you need an exact POCO copy of dynamically created proxy object. Fluent API is supported.
+The target nodes can be specified manually or by type. Comes very handy when using ORM tools (EF, NHibernate etc).
+"Lazy-Load" mode creates dynamic proxy objects that can be very tough for serialiation. Fluent API is supported.

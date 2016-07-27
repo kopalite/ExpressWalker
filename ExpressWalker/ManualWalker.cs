@@ -26,7 +26,7 @@ namespace ExpressWalker
             where TChildElement : class
         {
             var myElement = (ElementVisitor<TElement>)element;
-            var extractedName = Exp.NameOf(elementName);
+            var extractedName = Util.NameOf(elementName);
             var childElement = myElement.AddElementVisitor<TChildElement>(extractedName);
 
             if (buildAction != null)
