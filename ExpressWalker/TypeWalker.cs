@@ -57,16 +57,20 @@ namespace ExpressWalker
 
         private void Build(ElementVisitor visitor, int depth)
         {
-            if (depth == 1000)
+            if (depth == 100)
             {
-                throw new Exception("There is a circular references by type between properties!");
+                //There is a circular references by type between properties...
+                return;
             }
 
             var currentNodeType = visitor.ElementType;
 
             foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
+                //Trying to find property match, first by name and type. If not found, we will try only with type.
+
                 var exactMatch = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name);
+
                 var typedMatch = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == property.PropertyType);
 
                 if (exactMatch != null)
@@ -78,12 +82,18 @@ namespace ExpressWalker
                     visitor.AddProperty(property.PropertyType, property.Name, typedMatch.GetOldValue, typedMatch.GetNewValue);
                 }
 
-                var elementMatch = _elements.FirstOrDefault(t => t.ElementType == property.PropertyType);
-                if (elementMatch != null)
+                //If property type is not primitive, we will assume we should add it as an element, but after it built and 'empty' we will remove it.
+
+                if (!Util.IsSimpleType(property.PropertyType))
                 {
                     var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
 
                     Build(childVisitor, depth + 1);
+
+                    if (!childVisitor.AnyElement && !childVisitor.AnyProperty)
+                    {
+                        visitor.RemoveElement(property.PropertyType, property.Name);
+                    }
                 }
             }
         }
