@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="InstanceGuard.cs" />
     <Compile Include="ShallowCloner.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="ExpressAccessor.cs" />

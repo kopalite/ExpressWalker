@@ -15,7 +15,7 @@ namespace ExpressWalker
 
         object SetCopy(object parent, object element);
 
-        void Visit(object element, object blueprint, int depth = 0);
+        void Visit(object element, object blueprint, int depth = Constants.MaxDepth);
     }
 
     public interface IElementVisitor<TElement> : IElementVisitor
@@ -94,7 +94,7 @@ namespace ExpressWalker
             return blueprint;
         }
 
-        public void Visit(object element, object blueprint, int depth = 0)
+        public void Visit(object element, object blueprint, int depth = Constants.MaxDepth)
         {
             if (element == null)
             {
@@ -109,8 +109,18 @@ namespace ExpressWalker
             Visit((TElement)element, (TElement)blueprint, depth);
         }
 
-        public void Visit(TElement element, TElement blueprint, int depth = 0)
+        public void Visit(TElement element, TElement blueprint, int depth = Constants.MaxDepth)
         {
+            if (depth > Constants.MaxDepth)
+            {
+                throw new Exception(string.Format("Depth of visit cannot be more than {0}.", Constants.MaxDepth));
+            }
+
+            if (depth <= 0)
+            {
+                return;
+            }
+
             foreach (var propertyVisitor in _propertyVisitors)
             {
                 propertyVisitor.Visit(element, blueprint);
@@ -122,7 +132,7 @@ namespace ExpressWalker
 
                 var childBlueprint = elementVisitor.SetCopy(blueprint, childElement);
 
-                elementVisitor.Visit(childElement, childBlueprint);
+                elementVisitor.Visit(childElement, childBlueprint, depth - 1);
             }
         }
     }

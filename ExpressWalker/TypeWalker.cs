@@ -8,6 +8,8 @@ namespace ExpressWalker
 {
     public class TypeWalker<TRootType>
     {
+        private const int MaxDepth = 100;
+
         private List<ElementTarget> _elements;
 
         private List<PropertyTarget> _properties;
@@ -22,13 +24,6 @@ namespace ExpressWalker
         public static TypeWalker<TRootType> Create()
         {
             return new TypeWalker<TRootType>();
-        }
-
-        public TypeWalker<TRootType> ForElement<TElementType>()
-        {
-            _elements.Add(new ElementTarget(typeof(TElementType)));
-
-            return this;
         }
 
         public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType>> getOldValue,
@@ -48,18 +43,22 @@ namespace ExpressWalker
             return this;
         }
 
-        public IElementVisitor<TRootType> Build()
+        public IElementVisitor<TRootType> Build(int depth = Constants.MaxDepth)
         {
             var visitor = new ElementVisitor<TRootType>(null);
-            Build(visitor, 0);
+            Build(visitor, depth);
             return visitor;
         }
 
         private void Build(ElementVisitor visitor, int depth)
         {
-            if (depth == 100)
+            if (depth > Constants.MaxDepth)
             {
-                //There is a circular references by type between properties...
+                throw new Exception(string.Format("Depth of visit cannot be more than {0}.", Constants.MaxDepth));
+            }
+
+            if (depth <= 0)
+            {
                 return;
             }
 
@@ -67,28 +66,27 @@ namespace ExpressWalker
 
             foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                //Trying to find property match, first by name and type. If not found, we will try only with type.
+                //Trying to find property match, first by name, owner type and property type. If not found, we will try only with property type.
 
-                var exactMatch = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name);
+                var match = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name && p.PropertyType == property.PropertyType);
 
-                var typedMatch = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == property.PropertyType);
-
-                if (exactMatch != null)
+                if (match == null)
                 {
-                    visitor.AddProperty(property.PropertyType, property.Name, exactMatch.GetOldValue, exactMatch.GetNewValue);
-                }
-                else if (typedMatch != null)
-                {
-                    visitor.AddProperty(property.PropertyType, property.Name, typedMatch.GetOldValue, typedMatch.GetNewValue);
+                    match = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == property.PropertyType);
                 }
 
-                //If property type is not primitive, we will assume we should add it as an element, but after it built and 'empty' we will remove it.
+                if (match != null)
+                {
+                    visitor.AddProperty(property.PropertyType, property.Name, match.GetOldValue, match.GetNewValue);
+                }
+
+                //If property type is not primitive, we will assume we should add it as an element, but after it's being built and turns out it's 'empty', we will remove it.
 
                 if (!Util.IsSimpleType(property.PropertyType))
                 {
                     var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
 
-                    Build(childVisitor, depth + 1);
+                    Build(childVisitor, depth - 1);
 
                     if (!childVisitor.AnyElement && !childVisitor.AnyProperty)
                     {

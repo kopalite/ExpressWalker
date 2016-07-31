@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Linq.Expressions;
 
 namespace ExpressWalker.Test
 {
@@ -53,7 +52,6 @@ namespace ExpressWalker.Test
             return TypeWalker<Parent>.Create()
                                      .ForProperty<Parent, int>(p => p.TestInt, null, x => x * x)
                                      .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), x => x + x)
-                                     .ForElement<Child>()
                                      .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), x => x.AddYears(10))
                                      .ForProperty<CommonType>(x => Foo(x), p => new CommonType { CommonString = "..." });
         }

@@ -33,7 +33,7 @@ namespace ExpressWalker
 
         public TElement Clone(TElement element)
         {
-            if (element.Equals(default(TElement)))
+            if (element == null || element.Equals(default(TElement)))
             {
                 return default(TElement);
             }
