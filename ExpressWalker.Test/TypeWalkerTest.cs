@@ -18,7 +18,7 @@ namespace ExpressWalker.Test
             var walker = GetWalker();
             var visitor = walker.Build();
             var blueprint = new Parent();
-            visitor.Visit(sample, blueprint);
+            visitor.Visit(sample, blueprint, 10, new InstanceGuard());
 
             //Assert
 

@@ -1,16 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ExpressWalker
 {
-    internal class InstanceGuard
+    public class InstanceGuard
     {
+        public static InstanceGuard Instance = new InstanceGuard();
+
         private HashSet<int> _hashes;
 
         public InstanceGuard()
         {
             _hashes = new HashSet<int>();
         }
-
+        
         public void Guard(object instance)
         {
             if (instance == null)

@@ -15,7 +15,7 @@ namespace ExpressWalker
 
         object SetCopy(object parent, object element);
 
-        void Visit(object element, object blueprint, int depth = Constants.MaxDepth);
+        void Visit(object element, object blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null);
     }
 
     public interface IElementVisitor<TElement> : IElementVisitor
@@ -94,7 +94,7 @@ namespace ExpressWalker
             return blueprint;
         }
 
-        public void Visit(object element, object blueprint, int depth = Constants.MaxDepth)
+        public void Visit(object element, object blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null)
         {
             if (element == null)
             {
@@ -106,25 +106,38 @@ namespace ExpressWalker
                 throw new Exception(string.Format("Given element and blueprint must be of type '{0}'", typeof(TElement).ToString()));
             }
 
-            Visit((TElement)element, (TElement)blueprint, depth);
+            Visit((TElement)element, (TElement)blueprint, depth, guard);
         }
 
-        public void Visit(TElement element, TElement blueprint, int depth = Constants.MaxDepth)
+        public void Visit(TElement element, TElement blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null)
         {
             if (depth > Constants.MaxDepth)
             {
                 throw new Exception(string.Format("Depth of visit cannot be more than {0}.", Constants.MaxDepth));
             }
 
-            if (depth <= 0)
+            //If the depth reached given maximum at begining or instance was already visited (we have circular reference), we will just return.
+
+            if (depth <= 0 || (guard != null && guard.IsGuarded(element)))
             {
                 return;
             }
+
+            //Protecting the instance to be visited again.
+
+            if (guard != null)
+            {
+                guard.Guard(element);
+            }
+
+            //Visiting properties.
 
             foreach (var propertyVisitor in _propertyVisitors)
             {
                 propertyVisitor.Visit(element, blueprint);
             }
+
+            //Visiting elements.
 
             foreach (var elementVisitor in _elementVisitors)
             {
@@ -132,7 +145,9 @@ namespace ExpressWalker
 
                 var childBlueprint = elementVisitor.SetCopy(blueprint, childElement);
 
-                elementVisitor.Visit(childElement, childBlueprint, depth - 1);
+                //Setting the InstanceGuard of child element visitor with already visited instances.
+
+                elementVisitor.Visit(childElement, childBlueprint, depth - 1, guard);
             }
         }
     }
