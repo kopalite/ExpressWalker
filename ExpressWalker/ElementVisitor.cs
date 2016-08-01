@@ -15,10 +15,10 @@ namespace ExpressWalker
 
         object SetCopy(object parent, object element);
 
-        void Visit(object element, object blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null);
+        void Visit(object element, object blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null);
     }
 
-    public interface IElementVisitor<TElement> : IElementVisitor
+    public interface IElementVisitor<TElement> : IElementVisitor where TElement : class, new()
     {
 
     }
@@ -42,7 +42,7 @@ namespace ExpressWalker
         public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getOldValue, Expression getNewValue);
     }
 
-    internal partial class ElementVisitor<TElement> : IElementVisitor<TElement>
+    internal partial class ElementVisitor<TElement> : IElementVisitor<TElement> where TElement : class, new()
     {
         private ExpressAccessor _elementAccessor;
 
@@ -94,22 +94,28 @@ namespace ExpressWalker
             return blueprint;
         }
 
-        public void Visit(object element, object blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null)
+        public void Visit(object element, object blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null)
         {
             if (element == null)
             {
                 return;
             }
 
-            if (!(element is TElement && blueprint is TElement))
+            if (!(element is TElement))
             {
-                throw new Exception(string.Format("Given element and blueprint must be of type '{0}'", typeof(TElement).ToString()));
+                throw new Exception(string.Format("Given element and must be of type '{0}'", typeof(TElement).ToString()));
+            }
+            
+
+            if (blueprint != null && (!(blueprint is TElement)))
+            {
+                throw new Exception(string.Format("Given blueprint must be of type '{0}'", typeof(TElement).ToString()));
             }
 
             Visit((TElement)element, (TElement)blueprint, depth, guard);
         }
 
-        public void Visit(TElement element, TElement blueprint, int depth = Constants.MaxDepth, InstanceGuard guard = null)
+        public void Visit(TElement element, TElement blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null)
         {
             if (depth > Constants.MaxDepth)
             {
@@ -143,7 +149,12 @@ namespace ExpressWalker
             {
                 var childElement = elementVisitor.Extract(element);
 
-                var childBlueprint = elementVisitor.SetCopy(blueprint, childElement);
+                object childBlueprint = null;
+
+                if (blueprint != null)
+                {
+                    childBlueprint = elementVisitor.SetCopy(blueprint, childElement);
+                }
 
                 //Setting the InstanceGuard of child element visitor with already visited instances.
 
@@ -154,7 +165,7 @@ namespace ExpressWalker
 
     internal partial class ElementVisitor<TElement> : ElementVisitor
     {
-        public IElementVisitor<TChildElement> AddElementVisitor<TChildElement>(string elementName)
+        public IElementVisitor<TChildElement> AddElementVisitor<TChildElement>(string elementName) where TChildElement : class, new()
         {
             if (_elementVisitors.Any(ev => ev.ElementType == typeof(TChildElement) && ev.ElementName == elementName))
             {

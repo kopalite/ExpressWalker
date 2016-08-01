@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ExpressWalker
 {
-    public class TypeWalker<TRootType>
+    public class TypeWalker<TRootType> where TRootType : class, new()
     {
         private const int MaxDepth = 100;
 

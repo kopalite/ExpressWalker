@@ -61,10 +61,12 @@ namespace ExpressWalker
                 var currentValue = _propertyAccessor.Get(element);
                 var newValue = _getNewValue((TProperty)currentValue);
                 _propertyAccessor.Set(element, newValue);
-                _propertyAccessor.Set(blueprint, newValue);
+
+                if (blueprint != null)
+                {
+                    _propertyAccessor.Set(blueprint, newValue);
+                }
             }
         }
     }
-
-    
 }
