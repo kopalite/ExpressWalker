@@ -29,9 +29,11 @@ namespace ExpressWalker
 
         private Action<TProperty> _getOldValue;
 
-        private Func<TProperty, TProperty> _getNewValue;
+        private Func<TProperty, object, TProperty> _getNewValue;
+
+        private object _metadata;
         
-        internal PropertyVisitor(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, TProperty>> getNewValue)
+        internal PropertyVisitor(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
         {
             PropertyName = propertyName;
 
@@ -46,6 +48,8 @@ namespace ExpressWalker
             {
                 _getNewValue = getNewValue.Compile();
             }
+
+            _metadata = metadata;
         }
         
         public void Visit(TElement element, TElement blueprint)
@@ -59,7 +63,7 @@ namespace ExpressWalker
             if (_getNewValue != null)
             {
                 var currentValue = _propertyAccessor.Get(element);
-                var newValue = _getNewValue((TProperty)currentValue);
+                var newValue = _getNewValue((TProperty)currentValue, _metadata);
                 _propertyAccessor.Set(element, newValue);
 
                 if (blueprint != null)

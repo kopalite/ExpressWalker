@@ -27,7 +27,7 @@ namespace ExpressWalker
         }
 
         public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType>> getOldValue,
-                                                                Expression<Func<TPropertyType, TPropertyType>> getNewValue)
+                                                                Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
             _properties.Add(new PropertyTarget<TPropertyType>(null, typeof(TPropertyType), null, getOldValue, getNewValue));
 
@@ -36,7 +36,7 @@ namespace ExpressWalker
 
         public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
                                                                               Expression<Action<TPropertyType>> getOldValue,
-                                                                              Expression<Func<TPropertyType, TPropertyType>> getNewValue)
+                                                                              Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
             _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Util.NameOf(propertyName), getOldValue, getNewValue));
 

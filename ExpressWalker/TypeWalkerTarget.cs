@@ -42,7 +42,7 @@ namespace ExpressWalker
                               Type propertyType,
                               string propertyName,
                               Expression<Action<TPropertyType>> getOldValue,
-                              Expression<Func<TPropertyType, TPropertyType>> getNewValue) 
+                              Expression<Func<TPropertyType, object, TPropertyType>> getNewValue) 
             : base(elementType, propertyType, propertyName)
         {
             GetOldValue = getOldValue;

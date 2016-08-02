@@ -203,14 +203,14 @@ namespace ExpressWalker
             
         }
 
-        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, TProperty>> getNewValue)
+        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue)
         {
             if (_propertyVisitors.Any(pv => pv.ElementType == typeof(TElement) && pv.PropertyName == propertyName))
             {
                 throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), propertyName));
             }
 
-            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue);
+            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue, null /*TODO: Extract metadata object from TProperty type*/);
             _propertyVisitors.Add(propertyVisitor);
             return this;
         }

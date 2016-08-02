@@ -50,10 +50,10 @@ namespace ExpressWalker.Test
         public TypeWalker<Parent> GetWalker()
         {
             return TypeWalker<Parent>.Create()
-                                     .ForProperty<Parent, int>(p => p.TestInt, null, x => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), x => x + x)
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), x => x.AddYears(10))
-                                     .ForProperty<CommonType>(x => Foo(x), p => new CommonType { CommonString = "..." });
+                                     .ForProperty<Parent, int>(p => p.TestInt, null, (x, m) => x * x)
+                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), (x, m) => x + x)
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), (x, m) => x.AddYears(10))
+                                     .ForProperty<CommonType>(x => Foo(x), (x, m) => new CommonType { CommonString = "..." });
         }
 
         private int _counter;
