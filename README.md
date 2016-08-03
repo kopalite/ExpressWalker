@@ -8,7 +8,6 @@ That's why **IT IS WAY FASTER** than custom solutions usually built with reflect
 It is optionally protected from circular references so you can avoid StackOverflowException easily.
 Provides fluent API while building a visitor which increases code readability 
 in terms of recognizing the hierarchy buing built right away from the code.
-
 The optional and configurable things available are:
 
 - owner type of visited property 
