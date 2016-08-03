@@ -21,7 +21,7 @@ var visitor = TypeWalker<Parent>.Create()
 // 2. 'TestDate1' property of Child objects, anywhere in Parent's hierarchy
 // 3.  Any property of type CommonType, anywhere in Parent's hierarchy
 
-//Property setter: new value for property 'TestString1' is set by calling compiled expression '(old, met) => old + met'
+//Property setter: new value for property 'TestString1' is set by compiled expression '(old, met) => old + met'
 //'old' is old value, 'met' is metadata obj. coming from [VisitorMetadata] attribute on 'TestString1' property.
 
 ```
