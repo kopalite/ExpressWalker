@@ -42,4 +42,4 @@ var visitor = TypeWalker<Parent>.Create()
 
 ```
 There is also an option of ManualWaler for building more specific visitor that will visit only nodes
-in specific place in object graph (e.g. only a 'Child' element at level 3 and only it's 'TestString1' property.
+in specific place in object graph (e.g. only a 'Child' element at level 3 and only it's 'TestString1' property).
