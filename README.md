@@ -20,9 +20,9 @@ The optional and configurable things available are
 //building a visitor + visiting an object (with optional clone, visit depth and circular reference protection):
 
 var visitor = TypeWalker<Parent>.Create()
-                  .ForProperty<**Parent**, string>(p => p.**TestString1**, null, (old, met) => old + met)
-                  .ForProperty<**Child**, DateTime>(p => p.**TestDate1**, null, (old, met) => old.AddYears(10))
-                  .ForProperty<**CommonType**>(null, (old, met) => new CommonType { CommonString = "..." })
+                  .ForProperty<Parent, string>(p => p.TestString1, null, (old, met) => old + met)
+                  .ForProperty<Child, DateTime>(p => p.TestDate1, null, (old, met) => old.AddYears(10))
+                  .ForProperty<CommonType>(null, (old, met) => new CommonType { CommonString = "..." })
                   .Build();
                   
   var parentClone = new Parent();
