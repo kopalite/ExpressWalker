@@ -3,7 +3,7 @@ ExpressWalker provides a generic way to examine and change any object graph in f
 One can build generic hierarchy composition - called visitor - capable to "visit" any property, collect its value and change it.
 Uses refleciton only while building re-usable visitor (initial step) and relies purely on expression trees afterwards.
 
-That's why **it is way much faster** than custom solutions that are usually built with reflection.
+That's why **IT IS WAY MUCH FASTER** than custom solutions that are usually built with reflection.
 
 It is optionally protected from circular references so you can avoid StackOverflowException easily.
 Provides fluent API while building a visitor which increases code readability 
@@ -16,7 +16,7 @@ The optional and configurable things available are:
 - depth of visit 
 - expression for changing property value 
 - cloning
-- etc
+- etc.
 
 ```
 
