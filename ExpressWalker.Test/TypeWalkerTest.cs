@@ -51,7 +51,7 @@ namespace ExpressWalker.Test
         {
             return TypeWalker<Parent>.Create()
                                      .ForProperty<Parent, int>(p => p.TestInt, null, (x, m) => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), (x, m) => x + x)
+                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), (x, m) => x + x + m)
                                      .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), (x, m) => x.AddYears(10))
                                      .ForProperty<CommonType>(x => Foo(x), (x, m) => new CommonType { CommonString = "..." });
         }
@@ -81,7 +81,7 @@ namespace ExpressWalker.Test
         private bool IsCorrect(Parent parent)
         {
             return parent.TestInt == 100 &&
-                   parent.TestString == "aaaaaa" &&
+                   parent.TestString == "aaaaaametadata" &&
                    parent.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
                    parent.CommonType1.CommonString == "..." &&
                    parent.Child.CommonType1.CommonString == "..." &&
@@ -92,6 +92,7 @@ namespace ExpressWalker.Test
 
     public class Parent
     {
+        [VisitorMetadata("metadata")]
         public string TestString { get; set; }
 
         public int TestInt { get; set; }

@@ -210,7 +210,7 @@ namespace ExpressWalker
                 throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), propertyName));
             }
 
-            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue, null /*TODO: Extract metadata object from TProperty type*/);
+            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue, GetPropertyMetadata(propertyName));
             _propertyVisitors.Add(propertyVisitor);
             return this;
         }
@@ -221,6 +221,14 @@ namespace ExpressWalker
             var method = methodDef.MakeGenericMethod(propertyType);
             var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getOldValue, getNewValue });
             return visitor;
+        }
+
+        private object GetPropertyMetadata(string propertyName)
+        {
+            var elementType = typeof(TElement);
+            var property = elementType.GetProperty(propertyName);
+            var metadataAttribute = (VisitorMetadataAttribute)property.GetCustomAttributes(typeof(VisitorMetadataAttribute), false).FirstOrDefault();
+            return (metadataAttribute == null) ? null : metadataAttribute.Metadata;
         }
     }
 }
