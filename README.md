@@ -1,7 +1,7 @@
 # ExpressWalker
 ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern".
-One can build generic hierarchy composition - called visitor - capable to "visit" any property, collect its value and change it.
-Uses refleciton only while building re-usable visitor (initial step) and relies purely on expression trees afterwards.
+You can build generic hierarchy composition (visitor) capable to "visit" any property, collect its value and change it.
+Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects.
 
 That's why **IT IS WAY FASTER** than custom solutions usually built with reflection.
 
