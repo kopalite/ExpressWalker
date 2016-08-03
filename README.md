@@ -20,7 +20,8 @@ It is optionally protected from circular references. It provides fluent API in t
 var visitor = TypeWalker<Parent>.Create()
                   .ForProperty<Parent, string>(p => p.TestString1, null, (old, met) => old + met)
                   .ForProperty<Child, DateTime>(p => p.TestDate1, null, (old, met) => old.AddYears(10))
-                  .ForProperty<CommonType>(null, (old, met) => new CommonType { CommonString = "..." });
+                  .ForProperty<CommonType>(null, (old, met) => new CommonType { CommonString = "..." })
+                  .Build();
                   
   var parentClone = new Parent();
   visitor.Visit(parentObject, parentClone, 10, new InstanceGuard()); 
