@@ -7,6 +7,8 @@ It is optionally protected from circular references. It provides fluent API in t
 
 //example of building a visitor and visiting an object (with cloning it, specifying visit depth and protecting circular reference):
 
+```
+
 var visitor = TypeWalker<Parent>.Create()
                   .ForProperty<Parent, string>(p => p.TestString1, null, (old, met) => old + met)
                   .ForProperty<Child, DateTime>(p => p.TestDate1, null, (old, met) => old.AddYears(10))
@@ -19,6 +21,8 @@ var visitor = TypeWalker<Parent>.Create()
 // 2. 'TestDate1' property of Child objects, anywhere in Parent's hierarchy
 // 3.  Any property of type CommonType, anywhere in Parent's hierarchy
 
-//For property 'TestString1' new value is set by calling compiled expression '(old, met) => old + met'
+//Property setter: new value for property 'TestString1' is set by calling compiled expression '(old, met) => old + met'
 //'old' is old value, 'met' is metadata obj. coming from [VisitorMetadata] attribute on 'TestString1' property.
+
+```
 
