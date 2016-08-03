@@ -1,7 +1,15 @@
 # ExpressWalker
 ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern".
 One can build generic hierarchy composition - called visitor - capable to "visit" any property, collect its value and change it.
-The things that are configurable are: property owner, property name & type, depth of visit, changing value expression, cloning...
+
+The optional and configurable things available are
+
+- owner type of visited property 
+- name & type of visited property
+- depth of visit 
+- expression for changing property value, 
+- cloning...
+
 Uses refleciton only while building re-usable visitor (initial step) and relies purely on expression trees afterwards.
 It is optionally protected from circular references. It provides fluent API in the following way:
 
@@ -25,4 +33,5 @@ var visitor = TypeWalker<Parent>.Create()
 //'old' is old value, 'met' is metadata obj. coming from [VisitorMetadata] attribute on 'TestString1' property.
 
 ```
-
+There is also an option of ManualWaler for building more specific visitor that will visit only nodes
+in specific place in object graph (e.g. only a 'Child' element at level 3 and only it's 'TestString1' property.
