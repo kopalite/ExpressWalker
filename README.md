@@ -17,7 +17,7 @@ The optional and configurable things available are
 
 ```
 
-//building a visitor and visiting an object (with additional clone, visit depth and circular reference protection):
+//building a visitor + visiting an object (with optional clone, visit depth and circular reference protection):
 
 var visitor = TypeWalker<Parent>.Create()
                   .ForProperty<Parent, string>(p => p.TestString1, null, (old, met) => old + met)
