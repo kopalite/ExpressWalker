@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>ExpressWalker</id>
+        <version>1.0.0.9</version>
+        <title>ExpressWalker</title>
+        <authors>Ivan Kopcanski</authors>
+        <owners>Ivan Kopcanski</owners>
+        <licenseUrl>https://github.com/kopalite/ExpressWalker/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/kopalite/ExpressWalker</projectUrl>
+        <requireLicenseAcceptance>true</requireLicenseAcceptance>
+        <description>
+ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any property, basing on configuration. Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects. That's why IT IS WAY FASTER than custom solutions usually built with reflection.
+
+It is optionally protected from circular references so you can avoid StackOverflowException easily. Provides fluent API while building a visitor which increases code readability in terms of recognizing the hierarchy being built right away from the code. Some of functionalities available are visiting properties by matching owner type and name (or only type), specifying depth of visit, custom expression for changing property value, clonging etc.
+	
+//example of usage:
+
+  var visitor = TypeWalker&lt;Parent&gt;.Create()
+                  .ForProperty&lt;Parent, string&gt;(p => p.TestString1, null, (old, met) => old + met)
+                  .ForProperty&lt;Child, DateTime&gt;(p => p.TestDate1, null, (old, met) => old.AddYears(10))
+                  .ForProperty&lt;CommonType&gt;(null, (old, met) => new CommonType { CommonString = "..." })
+                  .Build();
+
+  var parentClone = new Parent();
+
+  visitor.Visit(parentObject, parentClone, 10, new InstanceGuard()); 
+
+Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions.
+Read more on https://github.com/kopalite/ExpressWalker 
+      </description>
+      <summary>
+ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any property, basing on configuration. Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects (Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions).
+      </summary>
+        <releaseNotes>Initial stable version</releaseNotes>
+        <copyright>Ivan Kopcanski 2016</copyright>
+        <language>en-US</language>
+        <tags>ExpressWalker Expressions Visitor</tags>
+        <dependencies />
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Core" targetFramework="" />
+            <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
+        </frameworkAssemblies>
+    </metadata>
+	<files>
+		<file src="..\bin\Release\ExpressWalker.dll" target="lib" />
+	</files>
+</package>
