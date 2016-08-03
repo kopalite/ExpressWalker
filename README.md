@@ -10,11 +10,11 @@ Provides fluent API while building a visitor which increases code readability
 in terms of recognizing the hierarchy buing built right away from the code.
 The optional and configurable things available are:
 
-- owner type of visited property 
-- name & type of visited property
-- depth of visit 
-- expression for changing property value 
-- cloning
+- visiting properties by matching owner type and property name 
+- visiting properties by matching property type only
+- specifying depth of visit in run-time (not during configuration)
+- custom expression for changing property value 
+- cloning of visited object
 - etc.
 
 ```
