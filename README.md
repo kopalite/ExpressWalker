@@ -7,7 +7,7 @@ The optional and configurable things available are
 - owner type of visited property 
 - name & type of visited property
 - depth of visit 
-- expression for changing property value, 
+- expression for changing property value 
 - cloning...
 
 Uses refleciton only while building re-usable visitor (initial step) and relies purely on expression trees afterwards.
