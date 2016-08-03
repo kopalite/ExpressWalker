@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.0.0.9</version>
+        <version>1.0.0.10</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -10,7 +10,7 @@
         <projectUrl>https://github.com/kopalite/ExpressWalker</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>
-ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any property, basing on configuration. Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects. That's why IT IS WAY FASTER than custom solutions usually built with reflection.
+ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any object's property, basing on configuration. Uses reflection only while building a visitor and relies purely on expression trees while visiting objects. That's why IT IS WAY FASTER than custom solutions usually built with reflection.
 
 It is optionally protected from circular references so you can avoid StackOverflowException easily. Provides fluent API while building a visitor which increases code readability in terms of recognizing the hierarchy being built right away from the code. Some of functionalities available are visiting properties by matching owner type and name (or only type), specifying depth of visit, custom expression for changing property value, clonging etc.
 	
