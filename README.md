@@ -17,7 +17,7 @@ var visitor = TypeWalker<Parent>.Create()
   var parentClone = new Parent();
   visitor.Visit(parentObject, parentClone, 10, new InstanceGuard()); 
 
-// 1. 'TestString1' property of Parent objects, , anywhere in Parent's hierarchy
+// 1. 'TestString1' property of Parent objects, anywhere in Parent's hierarchy
 // 2. 'TestDate1' property of Child objects, anywhere in Parent's hierarchy
 // 3.  Any property of type CommonType, anywhere in Parent's hierarchy
 
