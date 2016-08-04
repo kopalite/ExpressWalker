@@ -27,13 +27,13 @@ namespace ExpressWalker
 
         private ExpressAccessor _propertyAccessor;
 
-        private Action<TProperty> _getOldValue;
+        private Action<TProperty, object> _getOldValue;
 
         private Func<TProperty, object, TProperty> _getNewValue;
 
         private object _metadata;
         
-        internal PropertyVisitor(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
+        internal PropertyVisitor(string propertyName, Expression<Action<TProperty, object>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
         {
             PropertyName = propertyName;
 
@@ -57,7 +57,7 @@ namespace ExpressWalker
             if (_getOldValue != null)
             {
                 var currentValue = _propertyAccessor.Get(element);
-                _getOldValue((TProperty)currentValue);
+                _getOldValue((TProperty)currentValue, _metadata);
             }
 
             if (_getNewValue != null)

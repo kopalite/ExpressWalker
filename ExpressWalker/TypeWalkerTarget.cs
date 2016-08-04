@@ -41,7 +41,7 @@ namespace ExpressWalker
         public PropertyTarget(Type elementType,
                               Type propertyType,
                               string propertyName,
-                              Expression<Action<TPropertyType>> getOldValue,
+                              Expression<Action<TPropertyType, object>> getOldValue,
                               Expression<Func<TPropertyType, object, TPropertyType>> getNewValue) 
             : base(elementType, propertyType, propertyName)
         {

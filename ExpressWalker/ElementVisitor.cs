@@ -44,13 +44,13 @@ namespace ExpressWalker
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement> where TElement : class, new()
     {
-        private ExpressAccessor _elementAccessor;
+        private internal ExpressAccessor _elementAccessor;
 
-        private ShallowCloner<TElement> _elementCloner;
+        private internal ShallowCloner<TElement> _elementCloner;
         
-        private HashSet<IElementVisitor> _elementVisitors;
+        private internal HashSet<IElementVisitor> _elementVisitors;
 
-        private HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
+        private internal HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
 
         public override Type ElementType { get { return typeof(TElement); } }
 
@@ -203,7 +203,7 @@ namespace ExpressWalker
             
         }
 
-        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue)
+        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty, object>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue)
         {
             if (_propertyVisitors.Any(pv => pv.ElementType == typeof(TElement) && pv.PropertyName == propertyName))
             {

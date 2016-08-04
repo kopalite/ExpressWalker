@@ -40,7 +40,7 @@ namespace ExpressWalker
 
         public static IElementVisitor<TElement> Property<TElement, TProperty>(this IElementVisitor<TElement> element,
                                                                               Expression<Func<TElement, object>> propertyName,
-                                                                              Expression<Action<TProperty>> getOldValue,
+                                                                              Expression<Action<TProperty, object>> getOldValue,
                                                                               Expression<Func<TProperty, object, TProperty>> getNewValue) 
             where TElement : class, new()
             

@@ -53,28 +53,28 @@ namespace ExpressWalker.Test
 
             return ManualWalker.Create<A1>()
                                     .Property<A1, DateTime>(a1 => a1.A1Date, null, (va1, m) => va1.AddYears(10))
-                                    .Property<A1, int>(a1 => a1.A1Amount, x => Foo(x), (va1, m) => va1 * 3)
+                                    .Property<A1, int>(a1 => a1.A1Amount, (x, m) => Foo(x, m), (va1, m) => va1 * 3)
                                     .Element<A1, B1>(a1 => a1.B1, b1 =>
-                                            b1.Property<B1, string>(x => x.B1Name, x => Foo(x), (vb1, m) => vb1 + "Test2")
+                                            b1.Property<B1, string>(x => x.B1Name, (x, m) => Foo(x, m), (vb1, m) => vb1 + "Test2")
                                               .Element<B1, C1>(b11 => b11.C1, c1 =>
-                                                  c1.Property<C1, DateTime>(x => x.C1Date, x => Foo(x), (vc1, m) => vc1.AddYears(10))))
+                                                  c1.Property<C1, DateTime>(x => x.C1Date, (x, m) => Foo(x, m), (vc1, m) => vc1.AddYears(10))))
                                     .Element<A1, B2>(a1 => a1.B2, b2 => b2
-                                        .Property<B2, DateTime>(x => x.B2Date, x => Foo(x), (vb2, m) => vb2.AddYears(10)));
+                                        .Property<B2, DateTime>(x => x.B2Date, (x, m) => Foo(x, m), (vb2, m) => vb2.AddYears(10)));
         }
 
         private int _counter;
 
-        private void Foo(DateTime input)
+        private void Foo(DateTime input, object metadata)
         {
             _counter++;
         }
 
-        private void Foo(int input)
+        private void Foo(int input, object metadata)
         {
             _counter++;
         }
 
-        private void Foo(string input)
+        private void Foo(string input, object metadata)
         {
             _counter++;
         }

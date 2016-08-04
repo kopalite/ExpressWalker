@@ -51,29 +51,34 @@ namespace ExpressWalker.Test
         {
             return TypeWalker<Parent>.Create()
                                      .ForProperty<Parent, int>(p => p.TestInt, null, (x, m) => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, x => Foo(x), (x, m) => x + x + m)
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, x => Foo(x), (x, m) => x.AddYears(10))
-                                     .ForProperty<CommonType>(x => Foo(x), (x, m) => new CommonType { CommonString = "..." });
+                                     .ForProperty<Parent, string>(p => p.TestString, (x, m) => Foo(x, m), (x, m) => x + x + m)
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => Foo(x, m), (x, m) => x.AddYears(10))
+                                     .ForProperty<CommonType>((x, m) => Foo(x, m), (x, m) => new CommonType { CommonString = "..." });
         }
 
         private int _counter;
 
-        private void Foo(DateTime input)
+        private void Foo(DateTime input, object metadata)
         {
             _counter++;
         }
 
-        private void Foo(int input)
+        private void Foo(int input, object metadata)
         {
             _counter++;
         }
 
-        private void Foo(string input)
+        private void Foo(string input, object metadata)
         {
+            if (metadata == null)
+            {
+                throw new Exception("Metadata object should be properly passed to 'getOldValue' function!");
+            }
+
             _counter++;
         }
 
-        private void Foo(CommonType input)
+        private void Foo(CommonType input, object metadata)
         {
             _counter++;
         }

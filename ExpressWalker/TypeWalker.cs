@@ -8,16 +8,10 @@ namespace ExpressWalker
 {
     public class TypeWalker<TRootType> where TRootType : class, new()
     {
-        private const int MaxDepth = 100;
-
-        private List<ElementTarget> _elements;
-
         private List<PropertyTarget> _properties;
 
         private TypeWalker()
         {
-            _elements = new List<ElementTarget>();
-
             _properties = new List<PropertyTarget>();
         }
 
@@ -26,7 +20,7 @@ namespace ExpressWalker
             return new TypeWalker<TRootType>();
         }
 
-        public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType>> getOldValue,
+        public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType, object>> getOldValue,
                                                                 Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
             _properties.Add(new PropertyTarget<TPropertyType>(null, typeof(TPropertyType), null, getOldValue, getNewValue));
@@ -35,7 +29,7 @@ namespace ExpressWalker
         }
 
         public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
-                                                                              Expression<Action<TPropertyType>> getOldValue,
+                                                                              Expression<Action<TPropertyType, object>> getOldValue,
                                                                               Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
             _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Util.NameOf(propertyName), getOldValue, getNewValue));
