@@ -44,13 +44,13 @@ namespace ExpressWalker
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement> where TElement : class, new()
     {
-        private internal ExpressAccessor _elementAccessor;
+        private readonly ExpressAccessor _elementAccessor;
 
-        private internal ShallowCloner<TElement> _elementCloner;
+        private readonly ShallowCloner<TElement> _elementCloner;
         
-        private internal HashSet<IElementVisitor> _elementVisitors;
+        private readonly HashSet<IElementVisitor> _elementVisitors;
 
-        private internal HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
+        private readonly HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
 
         public override Type ElementType { get { return typeof(TElement); } }
 
