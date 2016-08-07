@@ -36,9 +36,9 @@ It is optionally protected from circular references so you can avoid StackOverfl
                                             .Property&lt;B2, DateTime&gt;(x => x.B2Date, (vb2, met) => vb2.AddYears(10)))
                                 .Build();
 
-  var parentBlueprint = new A1();
+  var parentClone = new A1();
   var propertyValues = new HashSet&lt;PropertyValue&gt;()
-  manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), propertyValues);
+  manualVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
