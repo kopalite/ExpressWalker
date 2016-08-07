@@ -38,12 +38,12 @@ namespace ExpressWalker
         
         public PropertyValue Visit(TElement element, TElement blueprint)
         {
-            var oldValue = default(TProperty);
-            var newValue = default(TProperty);
+            var oldValue = (TProperty)_propertyAccessor.Get(element);
+
+            var newValue = oldValue;
 
             if (_getNewValue != null)
             {
-                oldValue = (TProperty)_propertyAccessor.Get(element);
                 newValue = _getNewValue(oldValue, _metadata);
 
                 _propertyAccessor.Set(element, newValue);
