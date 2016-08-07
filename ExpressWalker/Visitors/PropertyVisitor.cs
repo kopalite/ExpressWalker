@@ -14,13 +14,13 @@ namespace ExpressWalker
     {
         public Type PropertyType { get { return typeof(TProperty); } }
 
-        public string PropertyName { get; }
+        public string PropertyName { get; private set; }
 
-        private ExpressAccessor _propertyAccessor;
+        private readonly ExpressAccessor _propertyAccessor;
 
-        private Func<TProperty, object, TProperty> _getNewValue;
+        private readonly Func<TProperty, object, TProperty> _getNewValue;
 
-        private object _metadata;
+        private readonly object _metadata;
         
         internal PropertyVisitor(string propertyName, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
         {
