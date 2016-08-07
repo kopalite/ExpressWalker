@@ -40,7 +40,7 @@ The optional and configurable things available are:
                                 .Build();
 
     var parentClone = new A1();
-    var propertyValues = new HashSet&lt;PropertyValue&gt;()
+    var propertyValues = new HashSet<PropertyValue>()
     manualVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
