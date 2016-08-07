@@ -19,20 +19,20 @@ The optional and configurable things available are:
 
 //example 1 - IVisitor that visits properties by property names and/or types (start from TypeWalker class):
 
-  var typeVisitor = TypeWalker<Parent>.Create()
+    var typeVisitor = TypeWalker<Parent>.Create()
 						.ForProperty<Parent, string>(p => p.TestString1, (old, met) => old + met)
 						.ForProperty<Child, DateTime>(p => p.TestDate1, (old, met) => old.AddYears(10))
 						.ForProperty<CommonType>((old, met) => new CommonType { CommonString = "..." })
 					.Build();
 
-  var parentClone = new Parent();
-  var propertyValues = new HashSet<PropertyValue>()
+    var parentClone = new Parent();
+    var propertyValues = new HashSet<PropertyValue>()
 
-  typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
+    typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
-var manualVisitor = ManualWalker.Create<A1>()
+    var manualVisitor = ManualWalker.Create<A1>()
                                     .Property<A1, DateTime>(a1 => a1.A1Date, (va1, m) => va1.AddYears(10))
                                     .Element<A1, B1>(a1 => a1.B1, b1 =>
                                             b1.Property<B1, string>(x => x.B1Name, (vb1, m) => vb1 + "Test2"))
@@ -40,9 +40,9 @@ var manualVisitor = ManualWalker.Create<A1>()
                                             .Property<B2, DateTime>(x => x.B2Date, (vb2, m) => vb2.AddYears(10)))
                                 .Build();
 
-            var parentBlueprint = new A1();
-            var values = new HashSet<PropertyValue>();
-            manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
+	var parentBlueprint = new A1();
+	var values = new HashSet<PropertyValue>();
+	manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.

@@ -29,7 +29,7 @@ It is optionally protected from circular references so you can avoid StackOverfl
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
-var manualVisitor = ManualWalker.Create&lt;A1&gt;()
+  var manualVisitor = ManualWalker.Create&lt;A1&gt;()
                                     .Property&lt;A1, DateTime&gt;(a1 => a1.A1Date, (va1, met) => va1.AddYears(10))
                                     .Element&lt;A1, B1&gt;(a1 => a1.B1, b1 =>
                                             b1.Property&lt;B1, string&gt;(x => x.B1Name, (vb1, met) => vb1 + "Test2"))
@@ -37,9 +37,9 @@ var manualVisitor = ManualWalker.Create&lt;A1&gt;()
                                             .Property&lt;B2, DateTime&gt;(x => x.B2Date, (vb2, met) => vb2.AddYears(10)))
                                 .Build();
 
-            var parentBlueprint = new A1();
-            var values = new HashSet&lt;PropertyValue&gt;();
-            manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
+  var parentBlueprint = new A1();
+  var values = new HashSet&lt;PropertyValue&gt;();
+  manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
