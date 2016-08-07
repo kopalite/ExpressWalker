@@ -68,11 +68,14 @@ namespace ExpressWalker.Test
         private bool IsCorrect(A1 sample, A1 blueprint, HashSet<PropertyValue> values)
         {
             var tenYearsAfter = DateTime.Now.Year + 10;
-            return sample.A1Date.Year == tenYearsAfter &&
-                   sample.A1Amount == 102 &&
-                   sample.B1.B1Name == "TestB1Test2" &&
-                   sample.B1.C1.C1Date.Year == tenYearsAfter &&
-                   sample.B2.B2Date.Year == tenYearsAfter;
+
+            Func<A1, bool> isCorrect = a => a.A1Date.Year == tenYearsAfter &&
+                   a.A1Amount == 102 &&
+                   a.B1.B1Name == "TestB1Test2" &&
+                   a.B1.C1.C1Date.Year == tenYearsAfter &&
+                   a.B2.B2Date.Year == tenYearsAfter;
+
+            return isCorrect(sample) && isCorrect(blueprint) && values.Count == 5;
         }
 
     }

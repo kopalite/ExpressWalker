@@ -68,7 +68,7 @@ namespace ExpressWalker.Test
                    p.CommonType1.CommonString == "..." &&
                    p.Child.CommonType1.CommonString == "...";
 
-            return isCorrect(parent) && isCorrect(blueprint);
+            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 5;
         }
     }
 
