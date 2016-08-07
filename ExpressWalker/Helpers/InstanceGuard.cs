@@ -5,8 +5,6 @@ namespace ExpressWalker
 {
     public class InstanceGuard
     {
-        public static InstanceGuard Instance = new InstanceGuard();
-
         private HashSet<int> _hashes;
 
         public InstanceGuard()

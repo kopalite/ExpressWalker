@@ -37,14 +37,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="InstanceGuard.cs" />
-    <Compile Include="VisitorMetadataAttribute.cs" />
-    <Compile Include="ShallowCloner.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="ExpressAccessor.cs" />
-    <Compile Include="PropertyVisitor.cs" />
+    <Compile Include="Helpers\InstanceGuard.cs" />
+    <Compile Include="Helpers\[Util].cs" />
+    <Compile Include="Visitors\VisitorMetadataAttribute.cs" />
+    <Compile Include="Helpers\ShallowCloner.cs" />
+    <Compile Include="Helpers\ExpressAccessor.cs" />
+    <Compile Include="Visitors\IElementVisitor.cs" />
+    <Compile Include="Visitors\IPropertyVisitor.cs" />
+    <Compile Include="Visitors\PropertyValue.cs" />
+    <Compile Include="Visitors\PropertyVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ElementVisitor.cs" />
+    <Compile Include="Visitors\ElementVisitor.cs" />
     <Compile Include="ManualWalker.cs" />
     <Compile Include="TypeWalker.cs" />
     <Compile Include="TypeWalkerTarget.cs" />

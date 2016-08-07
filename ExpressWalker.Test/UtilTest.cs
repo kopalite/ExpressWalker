@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ExpressWalker.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 namespace ExpressWalker.Test

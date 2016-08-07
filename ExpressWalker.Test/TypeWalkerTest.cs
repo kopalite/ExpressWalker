@@ -1,5 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ExpressWalker.Visitors;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 
 namespace ExpressWalker.Test
 {
@@ -18,11 +20,12 @@ namespace ExpressWalker.Test
             var walker = GetWalker();
             var visitor = walker.Build();
             var blueprint = new Parent();
-            visitor.Visit(sample, blueprint, 10, new InstanceGuard());
+            var values = new HashSet<PropertyValue>();
+            visitor.Visit(sample, blueprint, 10, new InstanceGuard(), values);
 
             //Assert
 
-            Assert.IsTrue(IsCorrect(sample));
+            Assert.IsTrue(IsCorrect(sample, blueprint, values));
         }
 
         public Parent GetSample()
@@ -50,48 +53,22 @@ namespace ExpressWalker.Test
         public TypeWalker<Parent> GetWalker()
         {
             return TypeWalker<Parent>.Create()
-                                     .ForProperty<Parent, int>(p => p.TestInt, null, (x, m) => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, (x, m) => Foo(x, m), (x, m) => x + x + m)
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => Foo(x, m), (x, m) => x.AddYears(10))
-                                     .ForProperty<CommonType>((x, m) => Foo(x, m), (x, m) => new CommonType { CommonString = "..." });
+                                     .ForProperty<Parent, int>(p => p.TestInt, (x, m) => x * x)
+                                     .ForProperty<Parent, string>(p => p.TestString, (x, m) => x + x + m)
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => x.AddYears(10))
+                                     .ForProperty<CommonType>((x, m) => new CommonType { CommonString = "..." });
         }
 
-        private int _counter;
-
-        private void Foo(DateTime input, object metadata)
+        
+        private bool IsCorrect(Parent parent, Parent blueprint, HashSet<PropertyValue> values)
         {
-            _counter++;
-        }
+            Func<Parent, bool> isCorrect = p => p.TestInt == 100 &&
+                   p.TestString == "aaaaaametadata" &&
+                   p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   p.CommonType1.CommonString == "..." &&
+                   p.Child.CommonType1.CommonString == "...";
 
-        private void Foo(int input, object metadata)
-        {
-            _counter++;
-        }
-
-        private void Foo(string input, object metadata)
-        {
-            if (metadata == null)
-            {
-                throw new Exception("Metadata object should be properly passed to 'getOldValue' function!");
-            }
-
-            _counter++;
-        }
-
-        private void Foo(CommonType input, object metadata)
-        {
-            _counter++;
-        }
-
-        private bool IsCorrect(Parent parent)
-        {
-            return parent.TestInt == 100 &&
-                   parent.TestString == "aaaaaametadata" &&
-                   parent.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
-                   parent.CommonType1.CommonString == "..." &&
-                   parent.Child.CommonType1.CommonString == "..." &&
-                   _counter == 4;
-
+            return isCorrect(parent) && isCorrect(blueprint);
         }
     }
 

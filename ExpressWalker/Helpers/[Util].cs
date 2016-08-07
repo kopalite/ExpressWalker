@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace ExpressWalker
+namespace ExpressWalker.Helpers
 {
     internal sealed class Util
     {

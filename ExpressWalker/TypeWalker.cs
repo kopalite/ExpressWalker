@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ExpressWalker.Helpers;
+using ExpressWalker.Visitors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,24 +22,22 @@ namespace ExpressWalker
             return new TypeWalker<TRootType>();
         }
 
-        public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Action<TPropertyType, object>> getOldValue,
-                                                                Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
+        public TypeWalker<TRootType> ForProperty<TPropertyType>(Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
-            _properties.Add(new PropertyTarget<TPropertyType>(null, typeof(TPropertyType), null, getOldValue, getNewValue));
+            _properties.Add(new PropertyTarget<TPropertyType>(null, typeof(TPropertyType), null, getNewValue));
 
             return this;
         }
 
         public TypeWalker<TRootType> ForProperty<TElementType, TPropertyType>(Expression<Func<TElementType, object>> propertyName,
-                                                                              Expression<Action<TPropertyType, object>> getOldValue,
                                                                               Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
         {
-            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Util.NameOf(propertyName), getOldValue, getNewValue));
+            _properties.Add(new PropertyTarget<TPropertyType>(typeof(TElementType), typeof(TPropertyType), Util.NameOf(propertyName), getNewValue));
 
             return this;
         }
 
-        public IElementVisitor<TRootType> Build(int depth = Constants.MaxDepth)
+        public IVisitor Build(int depth = Constants.MaxDepth)
         {
             var visitor = new ElementVisitor<TRootType>(null);
             Build(visitor, depth);
@@ -71,7 +71,7 @@ namespace ExpressWalker
 
                 if (match != null)
                 {
-                    visitor.AddProperty(property.PropertyType, property.Name, match.GetOldValue, match.GetNewValue);
+                    visitor.AddProperty(property.PropertyType, property.Name, match.GetNewValue);
                 }
 
                 //If property type is not primitive, we will assume we should add it as an element, but after it's being built and turns out it's 'empty', we will remove it.

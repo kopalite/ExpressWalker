@@ -1,5 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using ExpressWalker.Helpers;
+using ExpressWalker.Visitors;
+using System;
 using System.Linq.Expressions;
 
 namespace ExpressWalker
@@ -15,7 +16,6 @@ namespace ExpressWalker
                                                                                  Expression<Func<TElement, object>> elementName) 
             where TElement : class, new() 
             where TChildElement : class, new()
-            
         {
             return element.Element<TElement, TChildElement>(elementName, null);
         }
@@ -40,14 +40,18 @@ namespace ExpressWalker
 
         public static IElementVisitor<TElement> Property<TElement, TProperty>(this IElementVisitor<TElement> element,
                                                                               Expression<Func<TElement, object>> propertyName,
-                                                                              Expression<Action<TProperty, object>> getOldValue,
                                                                               Expression<Func<TProperty, object, TProperty>> getNewValue) 
             where TElement : class, new()
             
         {
             var myElement = (ElementVisitor<TElement>)element;
             var extractedName = Util.NameOf(propertyName);
-            var childElement = myElement.AddPropertyVisitor(extractedName, getOldValue, getNewValue);
+            var childElement = myElement.AddPropertyVisitor(extractedName, getNewValue);
+            return element;
+        }
+
+        public static IVisitor Build<TElement>(this IElementVisitor<TElement> element) where TElement : class, new()
+        {
             return element;
         }
     }

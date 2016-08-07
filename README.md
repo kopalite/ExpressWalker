@@ -17,28 +17,33 @@ The optional and configurable things available are:
 
 ```
 
-//building a visitor + visiting an object (with optional clone, visit depth and circular reference protection):
+//example 1 - IVisitor that visits properties by property names and/or types (start from TypeWalker class):
 
-var visitor = TypeWalker<Parent>.Create()
-                  .ForProperty<Parent, string>(p => p.TestString1, null, (old, met) => old + met)
-                  .ForProperty<Child, DateTime>(p => p.TestDate1, null, (old, met) => old.AddYears(10))
-                  .ForProperty<CommonType>(null, (old, met) => new CommonType { CommonString = "..." })
-                  .Build();
-                  
+  var typeVisitor = TypeWalker<Parent>.Create()
+						.ForProperty<Parent, string>(p => p.TestString1, (old, met) => old + met)
+						.ForProperty<Child, DateTime>(p => p.TestDate1, (old, met) => old.AddYears(10))
+						.ForProperty<CommonType>((old, met) => new CommonType { CommonString = "..." })
+					.Build();
+
   var parentClone = new Parent();
+  var propertyValues = new HashSet<PropertyValue>()
+
+  typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
   
-  visitor.Visit(parentObject, parentClone, 10, new InstanceGuard()); 
+//example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
-// The properties that are being visited and change here are:
-// 1. 'TestString1' property of Parent objects, anywhere in Parent's hierarchy
-// 2. 'TestDate1' property of Child objects, anywhere in Parent's hierarchy
-// 3.  Any property of type CommonType, anywhere in Parent's hierarchy
+var manualVisitor = ManualWalker.Create<A1>()
+                                    .Property<A1, DateTime>(a1 => a1.A1Date, (va1, m) => va1.AddYears(10))
+                                    .Element<A1, B1>(a1 => a1.B1, b1 =>
+                                            b1.Property<B1, string>(x => x.B1Name, (vb1, m) => vb1 + "Test2"))
+                                    .Element<A1, B2>(a1 => a1.B2, b2 => b2
+                                            .Property<B2, DateTime>(x => x.B2Date, (vb2, m) => vb2.AddYears(10)))
+                                .Build();
 
-//Property setter: new value for property 'TestString1' is set by compiled expression '(old, met) => old + met'
-//'old' is old value, 'met' is metadata obj. coming from [VisitorMetadata] attribute on 'TestString1' property.
-
+            var parentBlueprint = new A1();
+            var values = new HashSet<PropertyValue>();
+            manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
+			
 ```
-There is also an option of ManualWaler for building more specific visitor that will visit only nodes
-in specific place in object graph (e.g. only a 'Child' element at level 3 and only it's 'TestString1' property).
 
 Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions.

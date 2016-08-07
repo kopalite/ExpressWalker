@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.0.0.12</version>
+        <version>1.1.0.2</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -14,17 +14,32 @@ ExpressWalker provides a generic way to examine and change any object graph in f
 
 It is optionally protected from circular references so you can avoid StackOverflowException easily. Provides fluent API while building a visitor which increases code readability in terms of recognizing the hierarchy being built right away from the code. Some of functionalities available are visiting properties by matching owner type and name (or only type), specifying depth of visit, custom expression for changing property value, clonging etc.
 	
-//example of usage:
+//example 1 - IVisitor that visits properties by property names and/or types (start from TypeWalker class):
 
-  var visitor = TypeWalker&lt;Parent&gt;.Create()
+  var typeVisitor = TypeWalker&lt;Parent&gt;.Create()
                   .ForProperty&lt;Parent, string&gt;(p => p.TestString1, null, (old, met) => old + met)
                   .ForProperty&lt;Child, DateTime&gt;(p => p.TestDate1, null, (old, met) => old.AddYears(10))
                   .ForProperty&lt;CommonType&gt;(null, (old, met) => new CommonType { CommonString = "..." })
                   .Build();
 
   var parentClone = new Parent();
+  var propertyValues = new HashSet&lt;PropertyValue&gt;()
 
-  visitor.Visit(parentObject, parentClone, 10, new InstanceGuard()); 
+  typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
+  
+//example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
+
+var manualVisitor = ManualWalker.Create&lt;A1&gt;()
+                                    .Property&lt;A1, DateTime&gt;(a1 => a1.A1Date, (va1, m) => va1.AddYears(10))
+                                    .Element&lt;A1, B1&gt;(a1 => a1.B1, b1 =>
+                                            b1.Property&lt;B1, string&gt;(x => x.B1Name, (vb1, m) => vb1 + "Test2"))
+                                    .Element&lt;A1, B2&gt;(a1 => a1.B2, b2 => b2
+                                            .Property&lt;B2, DateTime&gt;(x => x.B2Date, (vb2, m) => vb2.AddYears(10)))
+                                .Build();
+
+            var parentBlueprint = new A1();
+            var values = new HashSet&lt;PropertyValue&gt;();
+            manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
 
 Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions.
 Read more on https://github.com/kopalite/ExpressWalker 

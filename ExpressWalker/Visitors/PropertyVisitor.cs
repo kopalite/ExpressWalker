@@ -1,19 +1,10 @@
-﻿using System;
+﻿using ExpressWalker.Visitors;
+using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace ExpressWalker
 {
-    public interface IPropertyVisitor<TElement>
-    {
-        Type ElementType { get; }
-
-        Type PropertyType { get; }
-
-        string PropertyName { get; }
-        
-        void Visit(TElement element, TElement blueprint);
-    }
-
     internal class PropertyVisitor<TElement>
     {
         public Type ElementType { get { return typeof(TElement); } }
@@ -27,22 +18,15 @@ namespace ExpressWalker
 
         private ExpressAccessor _propertyAccessor;
 
-        private Action<TProperty, object> _getOldValue;
-
         private Func<TProperty, object, TProperty> _getNewValue;
 
         private object _metadata;
         
-        internal PropertyVisitor(string propertyName, Expression<Action<TProperty, object>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
+        internal PropertyVisitor(string propertyName, Expression<Func<TProperty, object, TProperty>> getNewValue, object metadata)
         {
             PropertyName = propertyName;
 
             _propertyAccessor = ExpressAccessor.Create(typeof(TElement), typeof(TProperty), propertyName);
-
-            if (getOldValue != null)
-            {
-                _getOldValue = getOldValue.Compile();
-            }
 
             if (getNewValue != null)
             {
@@ -52,18 +36,16 @@ namespace ExpressWalker
             _metadata = metadata;
         }
         
-        public void Visit(TElement element, TElement blueprint)
+        public PropertyValue Visit(TElement element, TElement blueprint)
         {
-            if (_getOldValue != null)
-            {
-                var currentValue = _propertyAccessor.Get(element);
-                _getOldValue((TProperty)currentValue, _metadata);
-            }
+            var oldValue = default(TProperty);
+            var newValue = default(TProperty);
 
             if (_getNewValue != null)
             {
-                var currentValue = _propertyAccessor.Get(element);
-                var newValue = _getNewValue((TProperty)currentValue, _metadata);
+                oldValue = (TProperty)_propertyAccessor.Get(element);
+                newValue = _getNewValue(oldValue, _metadata);
+
                 _propertyAccessor.Set(element, newValue);
 
                 if (blueprint != null)
@@ -71,6 +53,8 @@ namespace ExpressWalker
                     _propertyAccessor.Set(blueprint, newValue);
                 }
             }
+
+            return new PropertyValue(typeof(TProperty), oldValue, newValue, _metadata);
         }
     }
 }

@@ -1,28 +1,11 @@
-﻿using System;
+﻿using ExpressWalker.Visitors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
 namespace ExpressWalker
 {
-    public interface IElementVisitor
-    {
-        Type ElementType { get; }
-
-        string ElementName { get; }
-        
-        object Extract(object parent);
-
-        object SetCopy(object parent, object element);
-
-        void Visit(object element, object blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null);
-    }
-
-    public interface IElementVisitor<TElement> : IElementVisitor where TElement : class, new()
-    {
-
-    }
-
     internal abstract class ElementVisitor
     {
         public abstract Type ElementType { get; }
@@ -38,8 +21,7 @@ namespace ExpressWalker
         public abstract void RemoveElement(Type elementType, string elementName);
 
         //getNewValue is convertible to Expression<Func<TPropertyType, TPropertyType>> where TPropertyType is specified in derived class.
-        //getOldValue is convertible to Expression<Action<TPropertyType>> where TPropertyType is specified in derived class.
-        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getOldValue, Expression getNewValue);
+        public abstract ElementVisitor AddProperty(Type propertyType, string propertyName,  Expression getNewValue);
     }
 
     internal partial class ElementVisitor<TElement> : IElementVisitor<TElement> where TElement : class, new()
@@ -94,7 +76,7 @@ namespace ExpressWalker
             return blueprint;
         }
 
-        public void Visit(object element, object blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null)
+        public void Visit(object element, object blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null, HashSet<PropertyValue> values = null)
         {
             if (element == null)
             {
@@ -112,10 +94,10 @@ namespace ExpressWalker
                 throw new Exception(string.Format("Given blueprint must be of type '{0}'", typeof(TElement).ToString()));
             }
 
-            Visit((TElement)element, (TElement)blueprint, depth, guard);
+            Visit((TElement)element, (TElement)blueprint, depth, guard, values);
         }
 
-        public void Visit(TElement element, TElement blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null)
+        public void Visit(TElement element, TElement blueprint = null, int depth = Constants.MaxDepth, InstanceGuard guard = null, HashSet<PropertyValue> values = null)
         {
             if (depth > Constants.MaxDepth)
             {
@@ -140,7 +122,12 @@ namespace ExpressWalker
 
             foreach (var propertyVisitor in _propertyVisitors)
             {
-                propertyVisitor.Visit(element, blueprint);
+                var value = propertyVisitor.Visit(element, blueprint);
+
+                if (values != null)
+                {
+                    values.Add(value);
+                }
             }
 
             //Visiting elements.
@@ -158,7 +145,7 @@ namespace ExpressWalker
 
                 //Setting the InstanceGuard of child element visitor with already visited instances.
 
-                elementVisitor.Visit(childElement, childBlueprint, depth - 1, guard);
+                elementVisitor.Visit(childElement, childBlueprint, depth - 1, guard, values);
             }
         }
     }
@@ -203,23 +190,23 @@ namespace ExpressWalker
             
         }
 
-        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Action<TProperty, object>> getOldValue, Expression<Func<TProperty, object, TProperty>> getNewValue)
+        public IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Func<TProperty, object, TProperty>> getNewValue)
         {
             if (_propertyVisitors.Any(pv => pv.ElementType == typeof(TElement) && pv.PropertyName == propertyName))
             {
                 throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), propertyName));
             }
 
-            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getOldValue, getNewValue, GetPropertyMetadata(propertyName));
+            var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getNewValue, GetPropertyMetadata(propertyName));
             _propertyVisitors.Add(propertyVisitor);
             return this;
         }
 
-        public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getOldValue, Expression getNewValue)
+        public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue)
         {
             var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor");
             var method = methodDef.MakeGenericMethod(propertyType);
-            var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getOldValue, getNewValue });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getNewValue });
             return visitor;
         }
 
