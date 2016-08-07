@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.1.0.2</version>
+        <version>1.1.0.3</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -17,9 +17,9 @@ It is optionally protected from circular references so you can avoid StackOverfl
 //example 1 - IVisitor that visits properties by property names and/or types (start from TypeWalker class):
 
   var typeVisitor = TypeWalker&lt;Parent&gt;.Create()
-                  .ForProperty&lt;Parent, string&gt;(p => p.TestString1, null, (old, met) => old + met)
-                  .ForProperty&lt;Child, DateTime&gt;(p => p.TestDate1, null, (old, met) => old.AddYears(10))
-                  .ForProperty&lt;CommonType&gt;(null, (old, met) => new CommonType { CommonString = "..." })
+                  .ForProperty&lt;Parent, string&gt;(p => p.TestString1, (old, met) => old + met)
+                  .ForProperty&lt;Child, DateTime&gt;(p => p.TestDate1, (old, met) => old.AddYears(10))
+                  .ForProperty&lt;CommonType&gt;((old, met) => new CommonType { CommonString = "..." })
                   .Build();
 
   var parentClone = new Parent();
