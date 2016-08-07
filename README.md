@@ -32,11 +32,11 @@ The optional and configurable things available are:
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
     var manualVisitor = ManualWalker.Create<A1>()
-                                    .Property<A1, DateTime>(a1 => a1.A1Date, (va1, m) => va1.AddYears(10))
+                                    .Property<A1, DateTime>(a1 => a1.A1Date, (va1, met) => va1.AddYears(10))
                                     .Element<A1, B1>(a1 => a1.B1, b1 =>
-                                            b1.Property<B1, string>(x => x.B1Name, (vb1, m) => vb1 + "Test2"))
+                                            b1.Property<B1, string>(x => x.B1Name, (vb1, met) => vb1 + "Test2"))
                                     .Element<A1, B2>(a1 => a1.B2, b2 => b2
-                                            .Property<B2, DateTime>(x => x.B2Date, (vb2, m) => vb2.AddYears(10)))
+                                            .Property<B2, DateTime>(x => x.B2Date, (vb2, met) => vb2.AddYears(10)))
                                 .Build();
 
     var parentClone = new A1();
