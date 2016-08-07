@@ -24,7 +24,6 @@ It is optionally protected from circular references so you can avoid StackOverfl
 
   var parentClone = new Parent();
   var propertyValues = new HashSet&lt;PropertyValue&gt;()
-
   typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
@@ -38,8 +37,8 @@ It is optionally protected from circular references so you can avoid StackOverfl
                                 .Build();
 
   var parentBlueprint = new A1();
-  var values = new HashSet&lt;PropertyValue&gt;();
-  manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
+  var propertyValues = new HashSet&lt;PropertyValue&gt;()
+  manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.

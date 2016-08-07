@@ -27,7 +27,6 @@ The optional and configurable things available are:
 
     var parentClone = new Parent();
     var propertyValues = new HashSet<PropertyValue>()
-
     typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
@@ -40,9 +39,9 @@ The optional and configurable things available are:
                                             .Property<B2, DateTime>(x => x.B2Date, (vb2, m) => vb2.AddYears(10)))
                                 .Build();
 
-	var parentBlueprint = new A1();
-	var values = new HashSet<PropertyValue>();
-	manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
+    var parentBlueprint = new A1();
+    var propertyValues = new HashSet&lt;PropertyValue&gt;()
+    manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
