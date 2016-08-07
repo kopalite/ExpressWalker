@@ -44,6 +44,10 @@ var manualVisitor = ManualWalker.Create<A1>()
             var values = new HashSet<PropertyValue>();
             manualVisitor.Visit(parentObject, parentBlueprint, 10, new InstanceGuard(), values);
 			
+//Paremeter 'met' in expressions above is optional metadata object set in design-time. 
+//It can be set by [VisitorMetadata] property attribute in visited class.
+//e.g. in example above, there is [VisitorMetadata("AnyString")] on property Parent.TestString1.
+			
 ```
 
 Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions.
