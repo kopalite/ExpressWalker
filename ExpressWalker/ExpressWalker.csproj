@@ -36,12 +36,16 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cloners\CollectionIListCloner.cs" />
+    <Compile Include="Cloners\CollectionEnumCloner.cs" />
+    <Compile Include="Cloners\InstanceCloner.cs" />
+    <Compile Include="Cloners\SequenceCloner.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\[Util].cs" />
     <Compile Include="Visitors\CollectionVisitor.cs" />
     <Compile Include="Visitors\VisitorMetadataAttribute.cs" />
-    <Compile Include="Helpers\ShallowCloner.cs" />
+    <Compile Include="Cloners\ShallowCloner.cs" />
     <Compile Include="Helpers\ExpressAccessor.cs" />
     <Compile Include="Visitors\IElementVisitor.cs" />
     <Compile Include="Visitors\IPropertyVisitor.cs" />

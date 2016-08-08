@@ -1,4 +1,5 @@
-﻿using ExpressWalker.Visitors;
+﻿using ExpressWalker.Cloners;
+using ExpressWalker.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +77,7 @@ namespace ExpressWalker
                 _elementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
             }
 
-            _elementCloner = new ShallowCloner<TElement>();
+            _elementCloner = ShallowCloner.Create(typeof(TElement));
         }
 
         public object Extract(object parent)

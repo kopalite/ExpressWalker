@@ -1,12 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ExpressWalker.Cloners;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressWalker.Test
 {
     [TestClass]
-    public class ShallowClonerTest
+    public class ClonerInstanceTest
     {
         [TestMethod]
-        public void ShallowCloner_Clone()
+        public void Cloner_Instance()
         {
             //Arrange
 
@@ -20,11 +21,13 @@ namespace ExpressWalker.Test
 
             //Act
 
-            var cloner = new ShallowCloner<X>();
-            var clone = cloner.Clone(x);
+            var cloner = ShallowCloner.Create(typeof(X));
+            var clone = (X)cloner.Clone(x);
 
             //Assert
 
+            Assert.IsNotNull(clone);
+            Assert.AreNotEqual(x, clone);
             Assert.AreEqual("Name1", clone.Name);
             Assert.AreEqual(1, clone.Number);
             Assert.AreEqual(2, clone.Double);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExpressWalker.Cloners;
+using System;
 
 namespace ExpressWalker.Visitors
 {
@@ -17,10 +18,8 @@ namespace ExpressWalker.Visitors
             {
                 _elementAccessor = ExpressAccessor.Create(ownerType, collectionType, elementName);
             }
-
-            var clonerType = typeof(ShallowCloner<>).MakeGenericType(collectionType);
-
-            _elementCloner = (ShallowCloner)Activator.CreateInstance(clonerType);
+            
+            _elementCloner = ShallowCloner.Create(collectionType);
         }
     }
 }

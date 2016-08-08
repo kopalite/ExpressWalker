@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -90,6 +91,51 @@ namespace ExpressWalker.Helpers
             }
 
             return false;
+        }
+
+        public static bool IsIEnumerable(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+        }
+
+        public static bool ImplementsIEnumerable(Type type)
+        {
+            return type.GetInterfaces().Any(IsIEnumerable);
+        }
+
+        public static Type GetItemsType(Type type)
+        {
+            if (IsIEnumerable(type))
+            {
+                return type.GenericTypeArguments.FirstOrDefault();   
+            }
+            else if (ImplementsIEnumerable(type))
+            {
+                return GetItemsType(type.GetInterfaces().FirstOrDefault(IsIEnumerable));
+            }
+
+            return null;
+        }
+
+        public static bool HasParameterlessCtor(Type type)
+        {
+            return type.GetConstructor(Type.EmptyTypes) != null;
+        }
+
+        public static bool HasCollectionCtor(Type type, Type ctorParamType)
+        {
+            Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
+            return type.GetConstructors().Any(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
+                                                   (IsIEnumerable(getParameterType(c)) || 
+                                                    ImplementsIEnumerable(getParameterType(c))));
+        }
+
+        public static ConstructorInfo GetCollectionCtor(Type type, Type ctorParamType)
+        {
+            Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
+            return type.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
+                                                             (IsIEnumerable(getParameterType(c)) ||
+                                                              ImplementsIEnumerable(getParameterType(c))));
         }
     }
 }
