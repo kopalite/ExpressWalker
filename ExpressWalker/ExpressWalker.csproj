@@ -36,10 +36,10 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cloners\CollectionIListCloner.cs" />
-    <Compile Include="Cloners\CollectionEnumCloner.cs" />
+    <Compile Include="Cloners\CollectionCloner.cs" />
+    <Compile Include="Cloners\ListCloner.cs" />
     <Compile Include="Cloners\InstanceCloner.cs" />
-    <Compile Include="Cloners\SequenceCloner.cs" />
+    <Compile Include="Cloners\ArrayCloner.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\[Util].cs" />

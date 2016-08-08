@@ -6,27 +6,27 @@ using System.Linq.Expressions;
 
 namespace ExpressWalker.Cloners
 {
-    internal sealed class CollectionEnumCloner<TCollection, TItem> : ShallowCloner
+    internal sealed class ListCloner<TList, TItem> : ShallowCloner
     {
-        private Func<IEnumerable<TItem>, TCollection> _constructor;
+        private Func<IEnumerable<TItem>, TList> _constructor;
 
         private ShallowCloner _itemsCloner;
 
-        public CollectionEnumCloner()
+        public ListCloner()
         {
             _constructor = Constructor();
 
             _itemsCloner = Create(typeof(TItem));
         }
 
-        private TCollection Clone(TCollection collection)
+        private TList Clone(TList list)
         {
-            if (collection == null || collection.Equals(default(TCollection)))
+            if (list == null || list.Equals(default(TList)))
             {
-                return default(TCollection);
+                return default(TList);
             }
 
-            var items = ((IEnumerable<TItem>)collection).Select(i => (TItem)_itemsCloner.Clone(i)).ToArray();
+            var items = ((IEnumerable<TItem>)list).Select(i => (TItem)_itemsCloner.Clone(i)).ToArray();
 
             var clone = _constructor(items);
 
@@ -40,21 +40,21 @@ namespace ExpressWalker.Cloners
                 return null;
             }
 
-            if (!(element is TCollection))
+            if (!(element is TList))
             {
-                throw new Exception(string.Format("Parameter 'element' must be of type '{0}'", typeof(TCollection).Name));
+                throw new Exception(string.Format("Parameter 'element' must be of type '{0}'", typeof(TList).Name));
             }
 
-            return Clone((TCollection)element);
+            return Clone((TList)element);
         }
 
-        private Func<IEnumerable<TItem>, TCollection> Constructor()
+        private Func<IEnumerable<TItem>, TList> Constructor()
         {
-            var type = typeof(TCollection);
+            var type = typeof(TList);
             var ctor = Util.GetCollectionCtor(type, typeof(IEnumerable<TItem>));
             var input = Expression.Parameter(typeof(IEnumerable<TItem>));
             var body = Expression.New(ctor, input);
-            var lambda = Expression.Lambda<Func<IEnumerable<TItem>, TCollection>>(body, input);
+            var lambda = Expression.Lambda<Func<IEnumerable<TItem>, TList>>(body, input);
             return lambda.Compile();
         }
     }

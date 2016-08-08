@@ -2,7 +2,7 @@
 
 namespace ExpressWalker.Cloners
 {
-    internal class SequenceCloner<TElement> : ShallowCloner
+    internal class ArrayClonner<TElement> : ShallowCloner
     {
         public override object Clone(object element)
         {

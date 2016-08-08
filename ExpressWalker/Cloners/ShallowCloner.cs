@@ -12,19 +12,19 @@ namespace ExpressWalker.Cloners
 
         public static ShallowCloner Create(Type elementType)
         {
-            if (IsCloneableEnumCollection(elementType))
+            if (IsCloneableList(elementType))
             {
-                return GetEnumerableCloner(elementType);
+                return GetListCloner(elementType);
             }
-            if (IsCloneableIListCollection(elementType))
+            if (IsCloneableCollection(elementType))
             {
-                return GetIListCloner(elementType);
+                return GetCollectionCloner(elementType);
             }
-            else if (IsCloneableSequence(elementType))
+            else if (ISCloneableArray(elementType))
             {
-                return GetSequenceCloner(elementType);
+                return GetArrayCloner(elementType);
             }
-            else if (IsCloneableNonSequence(elementType))
+            else if (IsCloneableInstance(elementType))
             {
                 return GetInstanceCloner(elementType);
             }
@@ -34,7 +34,7 @@ namespace ExpressWalker.Cloners
 
         #region [ Collection clonning ]
 
-        private static bool IsCloneableEnumCollection(Type type)
+        private static bool IsCloneableList(Type type)
         {
             var itemsType = Util.GetItemsType(type);
             if (itemsType == null)
@@ -47,15 +47,15 @@ namespace ExpressWalker.Cloners
             return Util.ImplementsIEnumerable(type) && Util.HasCollectionCtor(type, enumeParamType);
         }
 
-        private static ShallowCloner GetEnumerableCloner(Type elementType)
+        private static ShallowCloner GetListCloner(Type elementType)
         {
-            var typeDefinition = typeof(CollectionEnumCloner<,>);
+            var typeDefinition = typeof(ListCloner<,>);
             var itemsType = Util.GetItemsType(elementType);
             var concreteType = typeDefinition.MakeGenericType(elementType, itemsType);
             return (ShallowCloner)Activator.CreateInstance(concreteType);
         }
 
-        private static bool IsCloneableIListCollection(Type type)
+        private static bool IsCloneableCollection(Type type)
         {
             var itemsType = Util.GetItemsType(type);
             if (itemsType == null)
@@ -68,9 +68,9 @@ namespace ExpressWalker.Cloners
             return Util.ImplementsIEnumerable(type) && Util.HasCollectionCtor(type, listParamType);
         }
 
-        private static ShallowCloner GetIListCloner(Type elementType)
+        private static ShallowCloner GetCollectionCloner(Type elementType)
         {
-            var typeDefinition = typeof(CollectionIListCloner<,>);
+            var typeDefinition = typeof(CollectionClonner<,>);
             var itemsType = Util.GetItemsType(elementType);
             var concreteType = typeDefinition.MakeGenericType(elementType, itemsType);
             return (ShallowCloner)Activator.CreateInstance(concreteType);
@@ -80,14 +80,14 @@ namespace ExpressWalker.Cloners
 
         #region [ Sequence clonning ]
 
-        private static bool IsCloneableSequence(Type type)
+        private static bool ISCloneableArray(Type type)
         {
             return Util.IsIEnumerable(type);
         }
 
-        private static ShallowCloner GetSequenceCloner(Type elementType)
+        private static ShallowCloner GetArrayCloner(Type elementType)
         {
-            var typeDefinition = typeof(SequenceCloner<>);
+            var typeDefinition = typeof(ArrayClonner<>);
             var concreteType = typeDefinition.MakeGenericType(elementType);
             return (ShallowCloner)Activator.CreateInstance(concreteType);
         }
@@ -96,7 +96,7 @@ namespace ExpressWalker.Cloners
 
         #region [ Non-Collection clonning ]
 
-        private static bool IsCloneableNonSequence(Type type)
+        private static bool IsCloneableInstance(Type type)
         {
             return Util.HasParameterlessCtor(type); 
         }
