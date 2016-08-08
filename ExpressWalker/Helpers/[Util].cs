@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ExpressWalker.Helpers
 {
@@ -34,12 +35,32 @@ namespace ExpressWalker.Helpers
             throw new ArgumentException("Must be unary expression or member expression!");
         }
 
-        public static Func<TEntity> Constructor<TEntity>()
+        public static Type TypeOf<TType>(Expression<Func<TType, object>> expression)
         {
-            var body = Expression.New(typeof(TEntity));
-            var lambda = Expression.Lambda<Func<TEntity>>(body);
-            return lambda.Compile();
+            var lambda = expression as LambdaExpression;
+            if (lambda != null)
+            {
+                var member = lambda.Body as MemberExpression;
+                if (member != null)
+                {
+                    var property = member.Member as PropertyInfo;
+                    if (property != null)
+                    {
+                        return property.PropertyType;
+                    }
+
+                    var field = member.Member as FieldInfo;
+                    if (field != null)
+                    {
+                        return field.FieldType;
+                    }
+                }
+            }
+
+            throw new ArgumentException("Must be member expression of class' field property!");
         }
+
+        
 
         private static Type[] _valueTypes = new Type[]
         {

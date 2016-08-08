@@ -39,6 +39,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\[Util].cs" />
+    <Compile Include="Visitors\CollectionVisitor.cs" />
     <Compile Include="Visitors\VisitorMetadataAttribute.cs" />
     <Compile Include="Helpers\ShallowCloner.cs" />
     <Compile Include="Helpers\ExpressAccessor.cs" />

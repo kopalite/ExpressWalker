@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace ExpressWalker
 {
-    public class TypeWalker<TRootType> where TRootType : class, new()
+    public class TypeWalker<TRootType>
     {
         private List<PropertyTarget> _properties;
 

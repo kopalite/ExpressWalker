@@ -1,38 +1,47 @@
 ﻿using ExpressWalker.Helpers;
 using ExpressWalker.Visitors;
 using System;
+using System.Collections;
 using System.Linq.Expressions;
 
 namespace ExpressWalker
 {
     public static class ManualWalker
     {
-        public static IElementVisitor<TElement> Create<TElement>() where TElement : class, new()
+        public static IElementVisitor<TElement> Create<TElement>()
         {
             return new ElementVisitor<TElement>(typeof(TElement));
         }
 
-        public static IElementVisitor<TElement> Element<TElement, TChildElement>(this IElementVisitor<TElement> element,
-                                                                                 Expression<Func<TElement, object>> elementName) 
-            where TElement : class, new() 
-            where TChildElement : class, new()
-        {
-            return element.Element<TElement, TChildElement>(elementName, null);
-        }
-
         public static IElementVisitor<TElement> Element<TElement, TChildElement>(this IElementVisitor<TElement> element, 
-                                                                                 Expression<Func<TElement, object>> elementName,
-                                                                                 Expression<Action<IElementVisitor<TChildElement>>> buildAction)
-            where TElement : class, new()
-            where TChildElement : class, new()
+                                                                                 Expression<Func<TElement, object>> childElementName,
+                                                                                 Expression<Action<IElementVisitor<TChildElement>>> childElementSetup)
         {
             var myElement = (ElementVisitor<TElement>)element;
-            var extractedName = Util.NameOf(elementName);
+            var extractedName = Util.NameOf(childElementName);
             var childElement = myElement.AddElementVisitor<TChildElement>(extractedName);
 
-            if (buildAction != null)
+            if (childElementSetup != null)
             {
-                buildAction.Compile()(childElement);
+                childElementSetup.Compile()(childElement);
+            }
+
+            return element;
+        }
+
+        public static IElementVisitor<TElement> Collection<TElement, TCollectionElement>(this IElementVisitor<TElement> element,
+                                                                                    Expression<Func<TElement, object>> childElementName,
+                                                                                    Expression<Action<IElementVisitor<TCollectionElement>>> childElementSetup)
+            
+        {
+            var myElement = (ElementVisitor<TElement>)element;
+            var extractedName = Util.NameOf(childElementName);
+            var extractedType = Util.TypeOf(childElementName);
+            var collectionElement = myElement.AddCollectionVisitor<TCollectionElement>(extractedType, extractedName);
+
+            if (childElementSetup != null)
+            {
+                childElementSetup.Compile()(collectionElement);
             }
 
             return element;
@@ -41,7 +50,7 @@ namespace ExpressWalker
         public static IElementVisitor<TElement> Property<TElement, TProperty>(this IElementVisitor<TElement> element,
                                                                               Expression<Func<TElement, object>> propertyName,
                                                                               Expression<Func<TProperty, object, TProperty>> getNewValue) 
-            where TElement : class, new()
+            
             
         {
             var myElement = (ElementVisitor<TElement>)element;
@@ -50,7 +59,7 @@ namespace ExpressWalker
             return element;
         }
 
-        public static IVisitor Build<TElement>(this IElementVisitor<TElement> element) where TElement : class, new()
+        public static IVisitor Build<TElement>(this IElementVisitor<TElement> element)
         {
             return element;
         }

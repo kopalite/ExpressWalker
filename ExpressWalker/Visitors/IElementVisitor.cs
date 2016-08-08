@@ -19,7 +19,7 @@ namespace ExpressWalker.Visitors
         object SetCopy(object parent, object element);
     }
 
-    public interface IElementVisitor<TElement> : IElementVisitor where TElement : class, new()
+    public interface IElementVisitor<TElement> : IElementVisitor
     {
 
     }
