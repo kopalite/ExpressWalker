@@ -28,7 +28,7 @@ namespace ExpressWalker.Cloners
 
         public override bool IsMatch(Type elementType)
         {
-            if (!Util.ImplementsIEnumerable(elementType))
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsIEnumerable(elementType))
             {
                 return false;
             }
@@ -60,7 +60,7 @@ namespace ExpressWalker.Cloners
         public override bool IsMatch(Type elementType)
         {
 
-            if (!Util.ImplementsIEnumerable(elementType))
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsIEnumerable(elementType))
             {
                 return false;
             }
@@ -91,7 +91,7 @@ namespace ExpressWalker.Cloners
 
         public override bool IsMatch(Type elementType)
         {
-            return Util.IsIEnumerable(elementType) || elementType.IsArray;
+            return !Util.IsSimpleType(elementType) && (Util.IsIEnumerable(elementType) || elementType.IsArray);
         }
 
         public override ClonerBase GetCloner(Type elementType)
@@ -110,7 +110,7 @@ namespace ExpressWalker.Cloners
 
         public override bool IsMatch(Type elementType)
         {
-            return Util.HasParameterlessCtor(elementType);
+            return !Util.IsSimpleType(elementType) && Util.HasParameterlessCtor(elementType);
         }
 
         public override ClonerBase GetCloner(Type elementType)
