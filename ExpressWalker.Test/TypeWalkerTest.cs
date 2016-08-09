@@ -44,7 +44,7 @@ namespace ExpressWalker.Test
                     CommonType1 = new CommonType { CommonString = "njanja" },
                     Items = new[]
                     {
-                        new CollectionItem {  TestItemString = "njonjo" },
+                        new CollectionItem {  TestItemString = "njonjo", CommonType1Test = new CommonType { CommonString = "111" }  },
                         new CollectionItem {  TestItemString = "njinji" }
                     }
                 },
@@ -74,10 +74,11 @@ namespace ExpressWalker.Test
                    p.CommonType1.CommonString == "..." &&
                    p.Child.CommonType1.CommonString == "..." &&
                    p.Child.Items.Length == 2 &&
-                   p.Child.Items[0].TestItemString == "visited" &&
+                   p.Child.Items[0].TestItemString == "visited" && 
+                   p.Child.Items[0].CommonType1Test.CommonString == "..." &&
                    p.Child.Items[1].TestItemString == "visited";
 
-            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 7;
+            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 9;
         }
     }
 
@@ -121,5 +122,7 @@ namespace ExpressWalker.Test
     public class CollectionItem
     {
         public string TestItemString { get; set; }
+        
+        public CommonType CommonType1Test { get; set; }
     }
 }
