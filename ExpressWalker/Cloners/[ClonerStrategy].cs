@@ -8,6 +8,8 @@ namespace ExpressWalker.Cloners
     {
         public abstract int Priority { get; }
 
+        public abstract bool IsMatch(Type elementType);
+
         public abstract ClonerBase GetCloner(Type elementType);
 
         protected object Create(Type genericTypeDef, params Type[] genericTypeArgs)
@@ -24,25 +26,26 @@ namespace ExpressWalker.Cloners
     {
         public override int Priority { get { return 40; } }
 
-        public override ClonerBase GetCloner(Type elementType)
+        public override bool IsMatch(Type elementType)
         {
             if (!Util.ImplementsIEnumerable(elementType))
             {
-                return null;
+                return false;
             }
 
             var itemsType = Util.GetItemsType(elementType);
             if (itemsType == null)
             {
-                return null;
+                return false;
             }
 
             var enumParamType = typeof(IEnumerable<>).MakeGenericType(itemsType);
-            if (!Util.HasCollectionCtor(elementType, enumParamType))
-            {
-                return null;
-            }
+            return Util.HasCollectionCtor(elementType, enumParamType);
+        }
 
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var itemsType = Util.GetItemsType(elementType);
             return (ClonerBase)Create(typeof(ListCloner<,>), elementType, itemsType);
         }
     }
@@ -54,25 +57,27 @@ namespace ExpressWalker.Cloners
     {
         public override int Priority { get { return 30; } }
 
-        public override ClonerBase GetCloner(Type elementType)
+        public override bool IsMatch(Type elementType)
         {
+
             if (!Util.ImplementsIEnumerable(elementType))
             {
-                return null;
+                return false;
             }
 
             var itemsType = Util.GetItemsType(elementType);
             if (itemsType == null)
             {
-                return null;
+                return false;
             }
 
             var listParamType = typeof(IList<>).MakeGenericType(itemsType);
-            if (!Util.HasCollectionCtor(elementType, listParamType))
-            {
-                return null;
-            }
-            
+            return Util.HasCollectionCtor(elementType, listParamType);
+        }
+
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var itemsType = Util.GetItemsType(elementType);
             return (ClonerBase)Create(typeof(CollectionClonner<,>), elementType, itemsType); 
         }
     }
@@ -84,12 +89,13 @@ namespace ExpressWalker.Cloners
     {
         public override int Priority { get { return 20; } }
 
+        public override bool IsMatch(Type elementType)
+        {
+            return Util.IsIEnumerable(elementType) || elementType.IsArray;
+        }
+
         public override ClonerBase GetCloner(Type elementType)
         {
-            if (!(Util.IsIEnumerable(elementType) || elementType.IsArray))
-            {
-                return null;
-            }
             var itemsType = Util.GetItemsType(elementType);
             return (ClonerBase)Create(typeof(ArrayClonner<,>), elementType, itemsType);
         }
@@ -102,13 +108,13 @@ namespace ExpressWalker.Cloners
     {
         public override int Priority { get { return 10; } }
 
+        public override bool IsMatch(Type elementType)
+        {
+            return Util.HasParameterlessCtor(elementType);
+        }
+
         public override ClonerBase GetCloner(Type elementType)
         {
-            if (!Util.HasParameterlessCtor(elementType))
-            {
-                return null;
-            }
-
             return (ClonerBase)Create(typeof(InstanceCloner<>), elementType);
         }
     }
