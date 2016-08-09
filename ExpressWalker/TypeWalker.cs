@@ -74,44 +74,44 @@ namespace ExpressWalker
                     visitor.AddProperty(property.PropertyType, property.Name, match.GetNewValue);
                 }
 
-                //If property type is not primitive, we will assume we should add it as an element, but after it's being built and turns out it's 'empty', we will remove it.
-
-                
-                
-                if (!Util.IsSimpleType(property.PropertyType))
+                if (Util.IsSimpleType(property.PropertyType))
                 {
-                    if (Util.IsDictionary(property.PropertyType))
+                    continue;
+                }
+
+                //If property type is not primitive, we will assume we should add it as an element/collection, but after it's being built and turns out it's 'empty', we will remove it.
+
+                if (Util.IsDictionary(property.PropertyType))
+                {
+                    //TODO: Finish dictionary visit configuration once it's supported.
+                }
+                else if (Util.IsIEnumerable(property.PropertyType) || Util.ImplementsIEnumerable(property.PropertyType))
+                {
+                    var collectionItemType = Util.GetItemsType(property.PropertyType);
+
+                    if (Util.IsSimpleType(collectionItemType))
                     {
-                        //TODO: Finish dictionary visit configuration once it's supported.
+                        continue;
                     }
-                    else if (Util.IsIEnumerable(property.PropertyType) || Util.ImplementsIEnumerable(property.PropertyType))
+
+                    var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name);
+
+                    Build(childVisitor, depth - 1);
+
+                    if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
-                        var collectionItemType = Util.GetItemsType(property.PropertyType);
-
-                        if (Util.IsSimpleType(collectionItemType))
-                        {
-                            continue;
-                        }
-
-                        var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name);
-
-                        Build(childVisitor, depth - 1);
-
-                        if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
-                        {
-                            visitor.RemoveCollection(property.PropertyType, property.Name);
-                        }
+                        visitor.RemoveCollection(property.PropertyType, property.Name);
                     }
-                    else
+                }
+                else
+                {
+                    var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
+
+                    Build(childVisitor, depth - 1);
+
+                    if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
-                        var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
-
-                        Build(childVisitor, depth - 1);
-
-                        if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
-                        {
-                            visitor.RemoveElement(property.PropertyType, property.Name);
-                        }
+                        visitor.RemoveElement(property.PropertyType, property.Name);
                     }
                 }
             }

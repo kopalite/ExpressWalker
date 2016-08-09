@@ -186,14 +186,26 @@ namespace ExpressWalker
                 }
 
                 var originalEnumerator = childCollection.GetEnumerator();
-                var blueprintEnumerator = childCollectionBlueprint.GetEnumerator();
+                var blueprintEnumerator = childCollectionBlueprint != null ? childCollectionBlueprint.GetEnumerator() : null;
 
-                while (originalEnumerator.MoveNext() && blueprintEnumerator.MoveNext())
+                if (blueprintEnumerator != null)
                 {
-                    var originalElement = originalEnumerator.Current;
-                    var blueprintElement = blueprintEnumerator.Current;
+                    while (originalEnumerator.MoveNext() && blueprintEnumerator.MoveNext())
+                    {
+                        var originalElement = originalEnumerator.Current;
+                        var blueprintElement = blueprintEnumerator.Current;
 
-                    collectionVisitor.Visit(originalElement, blueprintElement, depth - 1, guard, values);
+                        collectionVisitor.Visit(originalElement, blueprintElement, depth - 1, guard, values);
+                    }
+                }
+                else
+                {
+                    while (originalEnumerator.MoveNext())
+                    {
+                        var originalElement = originalEnumerator.Current;
+
+                        collectionVisitor.Visit(originalElement, null, depth - 1, guard, values);
+                    }
                 }
             }
         }
