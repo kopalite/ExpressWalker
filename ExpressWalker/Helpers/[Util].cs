@@ -8,6 +8,8 @@ namespace ExpressWalker.Helpers
 {
     internal sealed class Util
     {
+        #region [ Expression based extractions ]
+
         public static string NameOf<TType>(Expression<Func<TType, object>> expression)
         {
             return NameOf((Expression)expression);
@@ -61,7 +63,9 @@ namespace ExpressWalker.Helpers
             throw new ArgumentException("Must be member expression of class' field property!");
         }
 
-        
+        #endregion
+
+        #region [ Simple type validation ]
 
         private static Type[] _valueTypes = new Type[]
         {
@@ -93,6 +97,10 @@ namespace ExpressWalker.Helpers
             return false;
         }
 
+        #endregion
+
+        #region [ Collection type validation ]
+
         public static bool IsIEnumerable(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
@@ -117,6 +125,19 @@ namespace ExpressWalker.Helpers
             return null;
         }
 
+        #endregion
+
+        #region [ Dictionary type validation ]
+
+        public static bool IsDictionary(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+        }
+
+        #endregion
+
+        #region [ Constructor validation ]
+
         public static bool HasParameterlessCtor(Type type)
         {
             return type.GetConstructor(Type.EmptyTypes) != null;
@@ -137,5 +158,7 @@ namespace ExpressWalker.Helpers
                                                              (IsIEnumerable(getParameterType(c)) ||
                                                               ImplementsIEnumerable(getParameterType(c))));
         }
+
+        #endregion
     }
 }

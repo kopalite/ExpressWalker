@@ -76,15 +76,42 @@ namespace ExpressWalker
 
                 //If property type is not primitive, we will assume we should add it as an element, but after it's being built and turns out it's 'empty', we will remove it.
 
+                
+                
                 if (!Util.IsSimpleType(property.PropertyType))
                 {
-                    var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
-
-                    Build(childVisitor, depth - 1);
-
-                    if (!childVisitor.AnyElement && !childVisitor.AnyProperty)
+                    if (Util.IsDictionary(property.PropertyType))
                     {
-                        visitor.RemoveElement(property.PropertyType, property.Name);
+                        //TODO: Finish dictionary visit configuration once it's supported.
+                    }
+                    else if (Util.IsIEnumerable(property.PropertyType) || Util.ImplementsIEnumerable(property.PropertyType))
+                    {
+                        var collectionItemType = Util.GetItemsType(property.PropertyType);
+
+                        if (Util.IsSimpleType(collectionItemType))
+                        {
+                            continue;
+                        }
+
+                        var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name);
+
+                        Build(childVisitor, depth - 1);
+
+                        if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
+                        {
+                            visitor.RemoveCollection(property.PropertyType, property.Name);
+                        }
+                    }
+                    else
+                    {
+                        var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
+
+                        Build(childVisitor, depth - 1);
+
+                        if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
+                        {
+                            visitor.RemoveElement(property.PropertyType, property.Name);
+                        }
                     }
                 }
             }

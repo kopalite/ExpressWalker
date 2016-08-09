@@ -2,6 +2,6 @@
 {
     public class Constants
     {
-        public const int MaxDepth = 30;
+        public const int MaxDepth = 50;
     }
 }

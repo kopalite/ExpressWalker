@@ -41,7 +41,12 @@ namespace ExpressWalker.Test
                     TestString1 = "aaa1",
                     TestInt1 = 10,
                     TestDate1 = DateTime.Now,
-                    CommonType1 = new CommonType { CommonString = "njanja" }
+                    CommonType1 = new CommonType { CommonString = "njanja" },
+                    Items = new[]
+                    {
+                        new CollectionItem {  TestItemString = "njonjo" },
+                        new CollectionItem {  TestItemString = "njinji" }
+                    }
                 },
             };
 
@@ -56,7 +61,8 @@ namespace ExpressWalker.Test
                                      .ForProperty<Parent, int>(p => p.TestInt, (x, m) => x * x)
                                      .ForProperty<Parent, string>(p => p.TestString, (x, m) => x + x + m)
                                      .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => x.AddYears(10))
-                                     .ForProperty<CommonType>((x, m) => new CommonType { CommonString = "..." });
+                                     .ForProperty<CommonType>((x, m) => new CommonType { CommonString = "..." })
+                                     .ForProperty<CollectionItem, string>(p => p.TestItemString, (x, m) => "visited");
         }
 
         
@@ -66,9 +72,12 @@ namespace ExpressWalker.Test
                    p.TestString == "aaaaaametadata" &&
                    p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
                    p.CommonType1.CommonString == "..." &&
-                   p.Child.CommonType1.CommonString == "...";
+                   p.Child.CommonType1.CommonString == "..." &&
+                   p.Child.Items.Length == 2 &&
+                   p.Child.Items[0].TestItemString == "visited" &&
+                   p.Child.Items[1].TestItemString == "visited";
 
-            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 5;
+            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 7;
         }
     }
 
@@ -99,11 +108,18 @@ namespace ExpressWalker.Test
         public virtual Parent Parent { get; set; }
 
         public CommonType CommonType1 { get; set; }
+
+        public CollectionItem[] Items { get; set; }
     }
 
     public class CommonType
     {
         public string CommonString { get; set; }
 
+    }
+
+    public class CollectionItem
+    {
+        public string TestItemString { get; set; }
     }
 }
