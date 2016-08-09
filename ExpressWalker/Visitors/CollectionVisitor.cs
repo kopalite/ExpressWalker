@@ -19,7 +19,7 @@ namespace ExpressWalker.Visitors
                 _elementAccessor = ExpressAccessor.Create(ownerType, collectionType, elementName);
             }
             
-            _elementCloner = ShallowCloner.Create(collectionType);
+            _elementCloner = ClonerBase.Create(collectionType);
         }
     }
 }

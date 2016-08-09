@@ -21,7 +21,7 @@ namespace ExpressWalker.Test
 
             //Act
 
-            var cloner = ShallowCloner.Create(typeof(X));
+            var cloner = ClonerBase.Create(typeof(X));
             var clone = (X)cloner.Clone(x);
 
             //Assert

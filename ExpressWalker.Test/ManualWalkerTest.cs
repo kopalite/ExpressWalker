@@ -64,13 +64,13 @@ namespace ExpressWalker.Test
                                     .Property<A1, int>(a1 => a1.A1Amount, (a1p, m) => a1p * 3)
                                     .Element<A1, B1>(a1 => a1.B1, b1 =>
                                             b1.Property<B1, string>(x => x.B1Name, (b1p, m) => b1p + "Test2")
-                                              .Element<B1, C1>(b11 => b11.C1, c1 =>
-                                                  c1.Property<C1, DateTime>(x => x.C1Date, (c1p, m) => c1p.AddYears(10))))
+/*nested elem.*/                               .Element<B1, C1>(b11 => b11.C1, c1 =>
+/*nested prop.*/                                  c1.Property<C1, DateTime>(x => x.C1Date, (c1p, m) => c1p.AddYears(10))))
                                     .Element<A1, B2>(a1 => a1.B2, b2 => b2
                                         .Property<B2, DateTime>(x => x.B2Date, (b2p, m) => b2p.AddYears(10))
                                         .Property<B2, int[]>(x => x.IntArray, (b2p, m) => b2p.Select(x => x * 2).ToArray())
-                                        .Collection<B2, C2>(x => x.C2List, c2l =>
-                                            c2l.Property<C2, string>(x => x.C2Name, (c2p, m) => c2p + "bbb")))
+/*collection*/                          .Collection<B2, C2>(x => x.C2List, c2l =>
+/*nested prop.*/                              c2l.Property<C2, string>(x => x.C2Name, (c2p, m) => c2p + "bbb")))
                                 .Build();
         }
 
@@ -83,10 +83,10 @@ namespace ExpressWalker.Test
                    a.A1Amount == 102 &&
                    a.B1.B1Name == "TestB1Test2" &&
                    a.B1.C1.C1Date.Year == tenYearsAfter &&
-                   a.B2.B2Date.Year == tenYearsAfter; //&&
-                   //a.B2.IntArray.Sum() == 1 * 2 + 2 * 2 + 3 * 2 &&
-                   //a.B2.C2List[0].C2Name == "aaabbb" &&
-                   //a.B2.C2List[1].C2Name == "yyybbb";
+                   a.B2.B2Date.Year == tenYearsAfter &&
+                   a.B2.IntArray.Sum() == 1 * 2 + 2 * 2 + 3 * 2 &&
+                   a.B2.C2List[0].C2Name == "aaabbb" &&
+                   a.B2.C2List[1].C2Name == "yyybbb";
 
             return isCorrect(sample) && isCorrect(blueprint) && values.Count == 6;
         }

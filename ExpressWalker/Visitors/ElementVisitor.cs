@@ -36,7 +36,7 @@ namespace ExpressWalker
     {
         protected ExpressAccessor _elementAccessor;
 
-        protected ShallowCloner _elementCloner;
+        protected ClonerBase _elementCloner;
 
         protected HashSet<IElementVisitor> _elementVisitors;
 
@@ -77,7 +77,7 @@ namespace ExpressWalker
                 _elementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
             }
 
-            _elementCloner = ShallowCloner.Create(typeof(TElement));
+            _elementCloner = ClonerBase.Create(typeof(TElement));
         }
 
         public object Extract(object parent)

@@ -23,7 +23,7 @@ namespace ExpressWalker.Test
 
             //Act
 
-            var cloner = ShallowCloner.Create(test2List.GetType());
+            var cloner = ClonerBase.Create(test2List.GetType());
             var clone = (List<Test2>)cloner.Clone(test2List);
 
             //Assert
@@ -50,7 +50,7 @@ namespace ExpressWalker.Test
 
             //Act
 
-            var cloner = ShallowCloner.Create(test2List.GetType());
+            var cloner = ClonerBase.Create(test2List.GetType());
             var clone = (Collection<Test2>)cloner.Clone(test2List);
 
             //Assert
@@ -77,7 +77,7 @@ namespace ExpressWalker.Test
 
             //Act
 
-            var cloner = ShallowCloner.Create(test2List.GetType());
+            var cloner = ClonerBase.Create(test2List.GetType());
             var clone = (HashSet<Test2>)cloner.Clone(test2List);
 
             //Assert
@@ -88,6 +88,33 @@ namespace ExpressWalker.Test
                           clone.Count == 2 &&
                           clone.Any(x => x.Name == "Name11") &&
                           clone.Any(x => x.Name == "Name12"));
+        }
+
+        [TestMethod]
+        public void Cloner_Collection_Array()
+        {
+            //Arrange
+
+            var test2List = new[]
+            {
+                new Test2 { Name = "Name11" },
+                new Test2 { Name = "Name12"}
+            };
+
+
+            //Act
+
+            var cloner = ClonerBase.Create(test2List.GetType());
+            var clone = (Test2[])cloner.Clone(test2List);
+
+            //Assert
+
+            Assert.IsTrue(clone != null &&
+                          clone != test2List &&
+                          clone.GetType() == test2List.GetType() &&
+                          clone.Length == 2 &&
+                          clone[0].Name == "Name11" &&
+                          clone[1].Name == "Name12");
         }
     }
 

@@ -10,13 +10,13 @@ namespace ExpressWalker.Cloners
     /// Clones non-collection reference types.
     /// </summary>
     /// <typeparam name="TElement"></typeparam>
-    internal sealed class InstanceCloner<TElement> : ShallowCloner
+    internal sealed class InstanceCloner<TElement> : ClonerBase
     {
         private Func<TElement> _constructor;
 
         private List<ExpressAccessor> _accessors;
 
-        public InstanceCloner()
+        public InstanceCloner() : base()
         {
             //Creating constructor function (1st step: createing initial instance).
 

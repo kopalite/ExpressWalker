@@ -6,13 +6,13 @@ using System.Linq.Expressions;
 
 namespace ExpressWalker.Cloners
 {
-    internal sealed class CollectionClonner<TCollection, TItem> : ShallowCloner
+    internal sealed class CollectionClonner<TCollection, TItem> : ClonerBase
     {
         private Func<IList<TItem>, TCollection> _constructor;
 
-        private ShallowCloner _itemsCloner;
+        private ClonerBase _itemsCloner;
 
-        public CollectionClonner()
+        public CollectionClonner() : base()
         {
             _constructor = Constructor();
 
