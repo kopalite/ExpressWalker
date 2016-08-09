@@ -11,7 +11,7 @@ namespace ExpressWalker.Cloners
                                                                    .Select(t => (ClonerStrategy)Activator.CreateInstance(t))
                                                                    .OrderByDescending(s => s.Priority)
                                                                    .ToArray();
-        public abstract object Clone(object array);
+        public abstract object Clone(object element);
 
         public static ClonerBase Create(Type elementType)
         {

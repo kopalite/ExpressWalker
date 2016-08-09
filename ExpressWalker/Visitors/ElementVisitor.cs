@@ -1,6 +1,7 @@
 ﻿using ExpressWalker.Cloners;
 using ExpressWalker.Visitors;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -87,7 +88,7 @@ namespace ExpressWalker
 
         public object SetCopy(object parent, object element)
         {
-            var blueprint = _elementCloner.Clone((TElement)element);
+            var blueprint = _elementCloner.Clone(element);
 
             _elementAccessor.Set(parent, blueprint);
 
@@ -164,6 +165,36 @@ namespace ExpressWalker
                 //Setting the InstanceGuard of child element visitor with already visited instances.
 
                 elementVisitor.Visit(childElement, childBlueprint, depth - 1, guard, values);
+            }
+
+            //Visiting collections.
+
+            foreach (var collectionVisitor in _collectionVisitors)
+            {
+                var childCollection = (IEnumerable)collectionVisitor.Extract(element);
+
+                IEnumerable childCollectionBlueprint = null;
+
+                if (blueprint != null)
+                {
+                    childCollectionBlueprint = (IEnumerable)collectionVisitor.SetCopy(blueprint, childCollection);
+                }
+
+                if (childCollection == null)
+                {
+                    continue;
+                }
+
+                var originalEnumerator = childCollection.GetEnumerator();
+                var blueprintEnumerator = childCollectionBlueprint.GetEnumerator();
+
+                while (originalEnumerator.MoveNext() && blueprintEnumerator.MoveNext())
+                {
+                    var originalElement = originalEnumerator.Current;
+                    var blueprintElement = blueprintEnumerator.Current;
+
+                    collectionVisitor.Visit(originalElement, blueprintElement, depth - 1, guard, values);
+                }
             }
         }
     }

@@ -14,7 +14,7 @@ namespace ExpressWalker.Test
         {
             //Arrange
 
-            var test2List = new List<Test2>
+            IList<Test2> test2List = new List<Test2>
             {
                 new Test2 { Name = "Name11" },
                 new Test2 { Name = "Name12"} 
@@ -41,7 +41,7 @@ namespace ExpressWalker.Test
         {
             //Arrange
 
-            var test2List = new Collection<Test2>
+            ICollection<Test2> test2List = new Collection<Test2>
             {
                 new Test2 { Name = "Name11" },
                 new Test2 { Name = "Name12"}
@@ -68,7 +68,7 @@ namespace ExpressWalker.Test
         {
             //Arrange
 
-            var test2List = new HashSet<Test2>
+            IEnumerable<Test2> test2List = new HashSet<Test2>
             {
                 new Test2 { Name = "Name11" },
                 new Test2 { Name = "Name12"}

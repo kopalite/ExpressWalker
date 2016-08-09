@@ -88,7 +88,7 @@ namespace ExpressWalker.Test
                    a.B2.C2List[0].C2Name == "aaabbb" &&
                    a.B2.C2List[1].C2Name == "yyybbb";
 
-            return isCorrect(sample) && isCorrect(blueprint) && values.Count == 6;
+            return isCorrect(sample) && isCorrect(blueprint) && values.Count == 8;
         }
 
     }
