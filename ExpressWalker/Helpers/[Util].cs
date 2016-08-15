@@ -80,7 +80,7 @@ namespace ExpressWalker.Helpers
 
         public static bool IsSimpleType(Type type)
         {
-            if (type.IsPrimitive || _valueTypes.Contains(type) || Convert.GetTypeCode(type) != TypeCode.Object)
+            if (type.IsPrimitive || type.IsEnum || _valueTypes.Contains(type) || Convert.GetTypeCode(type) != TypeCode.Object)
             {
                 return true;
             }

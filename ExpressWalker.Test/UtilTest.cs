@@ -19,10 +19,20 @@ namespace ExpressWalker.Test
             public int Prop2;
         }
 
+        enum TestEnum
+        {
+            First = 1,
+            Second = 2
+        }
+
         [TestMethod]
         public void Util_IsSimpleType()
         {
             Assert.IsTrue(Util.IsSimpleType(typeof(Enum)));
+            Assert.IsTrue(Util.IsSimpleType(typeof(TestEnum)));
+            Assert.IsTrue(Util.IsSimpleType(typeof(TestEnum?)));
+
+
             Assert.IsTrue(Util.IsSimpleType(typeof(String)));
             Assert.IsTrue(Util.IsSimpleType(typeof(Char)));
             Assert.IsTrue(Util.IsSimpleType(typeof(Guid)));

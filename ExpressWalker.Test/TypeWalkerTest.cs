@@ -110,16 +110,25 @@ namespace ExpressWalker.Test
         public CommonType CommonType1 { get; set; }
 
         public CollectionItem[] Items { get; set; }
+
+        public EnumTest Enum1 { get; set; }
+
+        public EnumTest? Enum2 { get; set; }
     }
 
     public class CommonType
     {
         public string CommonString { get; set; }
-
     }
 
     public class CollectionItem
     {
         public string TestItemString { get; set; }
+    }
+
+    public enum EnumTest
+    {
+        First = 1,
+        Second = 2
     }
 }
