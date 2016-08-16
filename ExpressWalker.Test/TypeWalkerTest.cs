@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ExpressWalker.Test
 {
@@ -48,6 +49,10 @@ namespace ExpressWalker.Test
                         new CollectionItem {  TestItemString = "njinji" }
                     }
                 },
+                TestList = new List<Class3> { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } },
+                TestCollection = new HashSet<Class3>(new []{ new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } }),
+                TestIList = new List<Class3> { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } },
+                TestICollection = new HashSet<Class3>(new[] { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } })
             };
 
             retVal.Child.Parent = retVal;
@@ -65,7 +70,7 @@ namespace ExpressWalker.Test
                                      .ForProperty<CollectionItem, string>(p => p.TestItemString, (x, m) => "visited");
         }
 
-        
+
         private bool IsCorrect(Parent parent, Parent blueprint, HashSet<PropertyValue> values)
         {
             Func<Parent, bool> isCorrect = p => p.TestInt == 100 &&
@@ -73,12 +78,15 @@ namespace ExpressWalker.Test
                    p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
                    p.CommonType1.CommonString == "..." &&
                    p.Child.CommonType1.CommonString == "..." &&
-                   p.Child.Items.Length == 2 &&
-                   p.Child.Items[0].TestItemString == "visited" && 
+                   p.Child.Items[0].TestItemString == "visited" &&
                    p.Child.Items[0].CommonType1Test.CommonString == "..." &&
-                   p.Child.Items[1].TestItemString == "visited";
+                   p.Child.Items[1].TestItemString == "visited" &&
+                   p.TestIList[0].TestCommonType.CommonString == "..." &&
+                   p.TestICollection.First().TestCommonType.CommonString == "..." &&
+                   p.TestList[0].TestCommonType.CommonString == "..." &&
+                   p.TestCollection.First().TestCommonType.CommonString == "...";
 
-            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 9;
+            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 13;
         }
     }
 
@@ -94,6 +102,14 @@ namespace ExpressWalker.Test
         public virtual Child Child { get; set; }
 
         public CommonType CommonType1 { get; set; }
+
+        public IList<Class3> TestIList { get; set; }
+
+        public ICollection<Class3> TestICollection { get; set; }
+
+        public List<Class3> TestList { get; set; }
+
+        public ICollection<Class3> TestCollection { get; set; }
     }
 
     public class Child
@@ -125,8 +141,13 @@ namespace ExpressWalker.Test
     public class CollectionItem
     {
         public string TestItemString { get; set; }
-        
+
         public CommonType CommonType1Test { get; set; }
+    }
+
+    public class Class3
+    {
+        public CommonType TestCommonType { get; set; }
     }
 
     public enum EnumTest

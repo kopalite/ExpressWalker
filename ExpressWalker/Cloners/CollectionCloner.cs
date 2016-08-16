@@ -33,19 +33,19 @@ namespace ExpressWalker.Cloners
             return clone;
         }
 
-        public override object Clone(object element)
+        public override object Clone(object collection)
         {
-            if (element == null)
+            if (collection == null)
             {
                 return null;
             }
 
-            if (!(element is TCollection))
+            if (!(collection is TCollection))
             {
-                throw new Exception(string.Format("Parameter 'element' must be of type '{0}'", typeof(TCollection).Name));
+                throw new Exception(string.Format("Parameter 'collection' must be of type '{0}'", typeof(TCollection).Name));
             }
 
-            return Clone((TCollection)element);
+            return Clone((TCollection)collection);
         }
 
         private Func<IList<TItem>, TCollection> Constructor()

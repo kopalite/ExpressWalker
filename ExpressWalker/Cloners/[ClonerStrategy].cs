@@ -1,5 +1,6 @@
 ﻿using ExpressWalker.Helpers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ExpressWalker.Cloners
@@ -28,7 +29,7 @@ namespace ExpressWalker.Cloners
 
         public override bool IsMatch(Type elementType)
         {
-            if (Util.IsSimpleType(elementType) || !Util.ImplementsIEnumerable(elementType))
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsGenericIEnumerable(elementType))
             {
                 return false;
             }
@@ -51,6 +52,37 @@ namespace ExpressWalker.Cloners
     }
 
     /// <summary>
+    /// Makes cloner for IList<T> collection type.
+    /// </summary>
+    internal class ListInterfaceStrategy : ClonerStrategy
+    {
+        public override int Priority { get { return 35; } }
+
+        public override bool IsMatch(Type elementType)
+        {
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsGenericIEnumerable(elementType))
+            {
+                return false;
+            }
+
+            var itemsType = Util.GetItemsType(elementType);
+            if (itemsType == null)
+            {
+                return false;
+            }
+
+            var iListType = typeof(IList<>).MakeGenericType(itemsType);
+            return elementType.Equals(iListType);
+        }
+
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var itemsType = Util.GetItemsType(elementType);
+            return (ClonerBase)Create(typeof(ListInterfaceCloner<>), itemsType);
+        }
+    }
+
+    /// <summary>
     ///Makes cloner for collection type that has constructor accepting single parameter of type IList<T> (like Collection<T>).
     /// </summary>
     internal class CollectionStrategy : ClonerStrategy
@@ -60,7 +92,7 @@ namespace ExpressWalker.Cloners
         public override bool IsMatch(Type elementType)
         {
 
-            if (Util.IsSimpleType(elementType) || !Util.ImplementsIEnumerable(elementType))
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsGenericIEnumerable(elementType))
             {
                 return false;
             }
@@ -83,6 +115,56 @@ namespace ExpressWalker.Cloners
     }
 
     /// <summary>
+    /// Makes cloner for IList<T> collection type.
+    /// </summary>
+    internal class CollectionInterfaceStrategy : ClonerStrategy
+    {
+        public override int Priority { get { return 25; } }
+
+        public override bool IsMatch(Type elementType)
+        {
+            if (Util.IsSimpleType(elementType) || !Util.ImplementsGenericIEnumerable(elementType))
+            {
+                return false;
+            }
+
+            var itemsType = Util.GetItemsType(elementType);
+            if (itemsType == null)
+            {
+                return false;
+            }
+
+            var iCollectionType = typeof(ICollection<>).MakeGenericType(itemsType);
+            return elementType.Equals(iCollectionType);
+        }
+
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var itemsType = Util.GetItemsType(elementType);
+            return (ClonerBase)Create(typeof(CollectionInterfaceCloner<>), itemsType);
+        }
+    }
+
+    /// <summary>
+    /// Makes cloner for explicit IEnumerable<T> types or concrete array types (like T[]).
+    /// </summary>
+    internal class ArrayListStrategy : ClonerStrategy
+    {
+        public override int Priority { get { return 22; } }
+
+        public override bool IsMatch(Type elementType)
+        {
+            return !Util.IsSimpleType(elementType) && elementType.Equals(typeof(ArrayList));
+        }
+
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var itemsType = Util.GetItemsType(elementType);
+            return new ArrayListClonner();
+        }
+    }
+
+    /// <summary>
     /// Makes cloner for explicit IEnumerable<T> types or concrete array types (like T[]).
     /// </summary>
     internal class ArrayStrategy : ClonerStrategy
@@ -91,7 +173,7 @@ namespace ExpressWalker.Cloners
 
         public override bool IsMatch(Type elementType)
         {
-            return !Util.IsSimpleType(elementType) && (Util.IsIEnumerable(elementType) || elementType.IsArray);
+            return !Util.IsSimpleType(elementType) && (Util.IsGenericEnumerable(elementType) || elementType.IsArray);
         }
 
         public override ClonerBase GetCloner(Type elementType)

@@ -36,6 +36,9 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cloners\ArrayListCloner.cs" />
+    <Compile Include="Cloners\CollectionInterfaceCloner.cs" />
+    <Compile Include="Cloners\ListInterfaceCloner.cs" />
     <Compile Include="Cloners\[ClonerBase].cs" />
     <Compile Include="Cloners\[ClonerStrategy].cs" />
     <Compile Include="Cloners\CollectionCloner.cs" />

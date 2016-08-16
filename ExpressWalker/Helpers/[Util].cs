@@ -101,25 +101,25 @@ namespace ExpressWalker.Helpers
 
         #region [ Collection type validation ]
 
-        public static bool IsIEnumerable(Type type)
+        public static bool IsGenericEnumerable(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
         }
 
-        public static bool ImplementsIEnumerable(Type type)
+        public static bool ImplementsGenericIEnumerable(Type type)
         {
-            return type.GetInterfaces().Any(IsIEnumerable);
+            return type.GetInterfaces().Any(IsGenericEnumerable);
         }
 
         public static Type GetItemsType(Type type)
         {
-            if (IsIEnumerable(type))
+            if (IsGenericEnumerable(type))
             {
                 return type.GenericTypeArguments.FirstOrDefault();   
             }
-            else if (ImplementsIEnumerable(type))
+            else if (ImplementsGenericIEnumerable(type))
             {
-                return GetItemsType(type.GetInterfaces().FirstOrDefault(IsIEnumerable));
+                return GetItemsType(type.GetInterfaces().FirstOrDefault(IsGenericEnumerable));
             }
 
             return null;
@@ -147,16 +147,16 @@ namespace ExpressWalker.Helpers
         {
             Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
             return type.GetConstructors().Any(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
-                                                   (IsIEnumerable(getParameterType(c)) || 
-                                                    ImplementsIEnumerable(getParameterType(c))));
+                                                   (IsGenericEnumerable(getParameterType(c)) || 
+                                                    ImplementsGenericIEnumerable(getParameterType(c))));
         }
 
         public static ConstructorInfo GetCollectionCtor(Type type, Type ctorParamType)
         {
             Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
             return type.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
-                                                             (IsIEnumerable(getParameterType(c)) ||
-                                                              ImplementsIEnumerable(getParameterType(c))));
+                                                             (IsGenericEnumerable(getParameterType(c)) ||
+                                                              ImplementsGenericIEnumerable(getParameterType(c))));
         }
 
         #endregion

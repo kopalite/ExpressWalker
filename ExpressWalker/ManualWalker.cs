@@ -17,7 +17,7 @@ namespace ExpressWalker
                                                                                  Expression<Func<TElement, object>> childElementName,
                                                                                  Expression<Action<IElementVisitor<TChildElement>>> childElementSetup)
         {
-            if (Util.IsIEnumerable(typeof(TElement)) || Util.ImplementsIEnumerable(typeof(TElement)))
+            if (Util.IsGenericEnumerable(typeof(TElement)) || Util.ImplementsGenericIEnumerable(typeof(TElement)))
             {
                 throw new Exception(string.Format("Element of type '{0}' is IEnumerable. Use Collection() method in order to configure visit to it.", typeof(TElement)));
             }

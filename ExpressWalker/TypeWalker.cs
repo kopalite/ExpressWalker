@@ -85,7 +85,7 @@ namespace ExpressWalker
                 {
                     //TODO: Finish dictionary visit configuration once it's supported.
                 }
-                else if (Util.IsIEnumerable(property.PropertyType) || Util.ImplementsIEnumerable(property.PropertyType))
+                else if (Util.IsGenericEnumerable(property.PropertyType) || Util.ImplementsGenericIEnumerable(property.PropertyType))
                 {
                     var collectionItemType = Util.GetItemsType(property.PropertyType);
 

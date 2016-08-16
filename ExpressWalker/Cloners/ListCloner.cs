@@ -33,19 +33,19 @@ namespace ExpressWalker.Cloners
             return clone;
         }
 
-        public override object Clone(object element)
+        public override object Clone(object list)
         {
-            if (element == null)
+            if (list == null)
             {
                 return null;
             }
 
-            if (!(element is TList))
+            if (!(list is TList))
             {
-                throw new Exception(string.Format("Parameter 'element' must be of type '{0}'", typeof(TList).Name));
+                throw new Exception(string.Format("Parameter 'list' must be of type '{0}'", typeof(TList).Name));
             }
 
-            return Clone((TList)element);
+            return Clone((TList)list);
         }
 
         private Func<IEnumerable<TItem>, TList> Constructor()

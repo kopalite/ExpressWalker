@@ -22,7 +22,7 @@ namespace ExpressWalker.Cloners
 
             if (!(array is TArray))
             {
-                throw new Exception(string.Format("Parameter 'element' must be of type '{0}'", typeof(TArray).Name));
+                throw new Exception(string.Format("Parameter 'array' must be of type '{0}'", typeof(TArray).Name));
             }
 
             if (array == null || array.Equals(default(TArray)))
