@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.3.0.1</version>
+        <version>1.3.0.3</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -50,7 +50,7 @@ Read more on https://github.com/kopalite/ExpressWalker
       <summary>
 ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any property, basing on configuration. Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects (Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions).
       </summary>
-        <releaseNotes>Collection properties declared as interfaces are now supported for visiting and cloning (IList, ICollection).</releaseNotes>
+        <releaseNotes>Bugfix: Read-only properties were throwing an exception.</releaseNotes>
         <copyright>Ivan Kopcanski 2016</copyright>
         <language>en-US</language>
         <tags>ExpressWalker Expressions Visitor</tags>

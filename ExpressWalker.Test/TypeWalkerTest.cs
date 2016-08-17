@@ -388,6 +388,8 @@ namespace ExpressWalker.Test
         public ICollection<ClassLevel1> TestCollection { get; set; }
 
         public ClassLevel1[]  TestArray{ get; set; }
+
+        public object ReadOnly { get; }
     }
 
     public class ClassLevel1
