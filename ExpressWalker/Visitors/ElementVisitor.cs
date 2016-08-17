@@ -125,7 +125,7 @@ namespace ExpressWalker
 
             //If the depth reached given maximum at begining or instance was already visited (we have circular reference), we will just return.
 
-            if (depth <= 0 || (guard != null && guard.IsGuarded(element)))
+            if (depth < 0 || (guard != null && guard.IsGuarded(element)))
             {
                 return;
             }

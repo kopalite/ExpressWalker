@@ -51,7 +51,7 @@ namespace ExpressWalker
                 throw new Exception(string.Format("Depth of visit cannot be more than {0}.", Constants.MaxDepth));
             }
 
-            if (depth <= 0)
+            if (depth < 0)
             {
                 return;
             }

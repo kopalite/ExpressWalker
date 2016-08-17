@@ -9,84 +9,322 @@ namespace ExpressWalker.Test
     [TestClass]
     public class TypeWalkerTest
     {
-        [TestMethod]
-        public void TypeWalker_Visit()
+        private IVisitor _visitor;
+        private Parent _sample;
+        private Parent _blueprint;
+        private HashSet<PropertyValue> _values;
+
+        [TestInitialize]
+        public void TestInitialize()
         {
-            //Arrange
-
-            var sample = GetSample();
-
-            //Act
-
-            var walker = GetWalker();
-            var visitor = walker.Build();
-            var blueprint = new Parent();
-            var values = new HashSet<PropertyValue>();
-            visitor.Visit(sample, blueprint, 10, new InstanceGuard(), values);
-
-            //Assert
-
-            Assert.IsTrue(IsCorrect(sample, blueprint, values));
-        }
-
-        public Parent GetSample()
-        {
-            var retVal = new Parent
+            _visitor = TypeWalker<Parent>.Create()
+                                     .ForProperty<Parent, int>(p => p.TestInt, (x, m) => x * x)
+                                     .ForProperty<Parent, string>(p => p.TestString, (x, m) => x + x + m)
+                                     .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => x.AddYears(10))
+                                     .ForProperty<CommonType>((x, m) => new CommonType { CommonString = "..." })
+                                     .ForProperty<ClassLevel1, string>(p => p.SomeString, (x, m) => "visited").Build();
+            _sample = new Parent
             {
+                //level 0
                 TestString = "aaa",
                 TestInt = 10,
                 TestDate = DateTime.Now,
                 CommonType1 = new CommonType { CommonString = "brlj" },
                 Child = new Child
                 {
+                    //level1
                     TestString1 = "aaa1",
                     TestInt1 = 10,
                     TestDate1 = DateTime.Now,
                     CommonType1 = new CommonType { CommonString = "njanja" },
-                    Items = new[]
+                    ChildLevel1 = new ChildLevel1
                     {
-                        new CollectionItem {  TestItemString = "njonjo", CommonType1Test = new CommonType { CommonString = "111" }  },
-                        new CollectionItem {  TestItemString = "njinji" }
+                        //level2
+                        ChildLevel2 = new ChildLevel2
+                        {
+                            TestCommonType = new CommonType { CommonString = "njunjnu" }
+                        }
                     }
                 },
-                TestList = new List<Class3> { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } },
-                TestCollection = new HashSet<Class3>(new []{ new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } }),
-                TestIList = new List<Class3> { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } },
-                TestICollection = new HashSet<Class3>(new[] { new Class3 { TestCommonType = new CommonType { CommonString = "njunjnu" } } })
+                
+                //level0
+                CollectionChild = new CollectionChild()
+                {
+                    //level0
+                    TestList = new List<ClassLevel1>
+                    {
+                        //level1
+                        new ClassLevel1
+                        {
+                            //level2                       
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        },
+                        new ClassLevel1
+                        {
+                            //level2    
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        }
+                    },
+                    //level0
+                    TestCollection = new HashSet<ClassLevel1>(new[]
+                    {
+                        //level1
+                        new ClassLevel1
+                        {
+                            //level2  
+                            ClassLevel2 = new ClassLevel2 { TestCommonType = new CommonType { CommonString = "njunjnu" }},
+                            SomeString = "njenje"
+                        },
+                        new ClassLevel1
+                        {
+                            //level2    
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        }
+                    }),
+                    //level0
+                    TestIList = new List<ClassLevel1>
+                    {
+                        //level1
+                        new ClassLevel1
+                        {
+                            //level2  
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" }},
+                            SomeString = "njenje"
+                        },
+                        new ClassLevel1
+                        {
+                            //level2    
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        }
+                    },
+                    //level0
+                    TestICollection = new HashSet<ClassLevel1>(new[]
+                    {
+                        //level1
+                        new ClassLevel1
+                        {
+                            //level2  
+                            ClassLevel2 = new ClassLevel2 {TestCommonType = new CommonType { CommonString = "njunjnu" }},
+                            SomeString = "njenje"
+                        },
+                        new ClassLevel1
+                        {
+                            //level2    
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        }
+                    }),
+                    //level0
+                    TestArray = new ClassLevel1[]
+                    {
+                        //level1
+                        new ClassLevel1
+                        {
+                            //level2  
+                            ClassLevel2 = new ClassLevel2 {TestCommonType = new CommonType { CommonString = "njunjnu" }},
+                            SomeString = "njenje"
+                        },
+                        new ClassLevel1
+                        {
+                            //level2    
+                            ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                            SomeString = "njenje"
+                        }
+                    }
+                }
             };
 
-            retVal.Child.Parent = retVal;
+            _sample.Child.Parent = _sample;
 
-            return retVal;
+            _blueprint = new Parent();
+
+            _values = new HashSet<PropertyValue>();
         }
 
-        public TypeWalker<Parent> GetWalker()
+        [TestMethod]
+        public void TypeWalker_Visit_All()
         {
-            return TypeWalker<Parent>.Create()
-                                     .ForProperty<Parent, int>(p => p.TestInt, (x, m) => x * x)
-                                     .ForProperty<Parent, string>(p => p.TestString, (x, m) => x + x + m)
-                                     .ForProperty<Child, DateTime>(p => p.TestDate1, (x, m) => x.AddYears(10))
-                                     .ForProperty<CommonType>((x, m) => new CommonType { CommonString = "..." })
-                                     .ForProperty<CollectionItem, string>(p => p.TestItemString, (x, m) => "visited");
-        }
+            //Act
 
+            _visitor.Visit(_sample, _blueprint, 10, new InstanceGuard(), _values);
 
-        private bool IsCorrect(Parent parent, Parent blueprint, HashSet<PropertyValue> values)
-        {
-            Func<Parent, bool> isCorrect = p => p.TestInt == 100 &&
+            //Assert
+
+            Func<IEnumerable<ClassLevel1>, bool> isCollectionOK = x =>
+                   x.Count() == 2 &&
+                   x.First().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.First().SomeString == "visited" &&
+                   x.Last().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.Last().SomeString == "visited";
+
+            Func<Parent, bool> isOk = p => p.TestInt == 100 &&
                    p.TestString == "aaaaaametadata" &&
                    p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
                    p.CommonType1.CommonString == "..." &&
                    p.Child.CommonType1.CommonString == "..." &&
-                   p.Child.Items[0].TestItemString == "visited" &&
-                   p.Child.Items[0].CommonType1Test.CommonString == "..." &&
-                   p.Child.Items[1].TestItemString == "visited" &&
-                   p.TestIList[0].TestCommonType.CommonString == "..." &&
-                   p.TestICollection.First().TestCommonType.CommonString == "..." &&
-                   p.TestList[0].TestCommonType.CommonString == "..." &&
-                   p.TestCollection.First().TestCommonType.CommonString == "...";
+                   p.Child.ChildLevel1.ChildLevel2.TestCommonType.CommonString == "..." &&
+                   isCollectionOK(p.CollectionChild.TestIList) &&
+                   isCollectionOK(p.CollectionChild.TestICollection) &&
+                   isCollectionOK(p.CollectionChild.TestList) &&
+                   isCollectionOK(p.CollectionChild.TestCollection) &&
+                   isCollectionOK(p.CollectionChild.TestArray);
+            
 
-            return isCorrect(parent) && isCorrect(blueprint) && values.Count == 13;
+            Assert.IsTrue(isOk(_sample) && isOk(_blueprint) && _values.Count == 26);
+        }
+
+        
+
+        [TestMethod]
+        public void TypeWalker_Visit_All_NullBlueprint()
+        {
+            //Act
+
+            _visitor.Visit(_sample, null, 10, new InstanceGuard(), _values);
+
+            //Assert
+
+            Func<IEnumerable<ClassLevel1>, bool> isCollectionOK = x =>
+                   x.Count() == 2 &&
+                   x.First().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.First().SomeString == "visited" &&
+                   x.Last().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.Last().SomeString == "visited";
+
+            Func<Parent, bool> isOk = p => p.TestInt == 100 &&
+                   p.TestString == "aaaaaametadata" &&
+                   p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   p.CommonType1.CommonString == "..." &&
+                   p.Child.CommonType1.CommonString == "..." &&
+                   p.Child.ChildLevel1.ChildLevel2.TestCommonType.CommonString == "..." &&
+                   isCollectionOK(p.CollectionChild.TestIList) &&
+                   isCollectionOK(p.CollectionChild.TestICollection) &&
+                   isCollectionOK(p.CollectionChild.TestList) &&
+                   isCollectionOK(p.CollectionChild.TestCollection) &&
+                   isCollectionOK(p.CollectionChild.TestArray);
+
+
+            Assert.IsTrue(isOk(_sample) && _values.Count == 26);
+        }
+
+        [TestMethod]
+        public void TypeWalker_Visit_Depth3()
+        {
+            //Act
+
+            _visitor.Visit(_sample, _blueprint, 3, new InstanceGuard(), _values);
+
+            //Assert
+
+            Func<IEnumerable<ClassLevel1>, bool> isCollectionOK = x =>
+                   x.Count() == 2 &&
+                   x.First().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.First().SomeString == "visited" &&
+                   x.Last().ClassLevel2.TestCommonType.CommonString == "..." &&
+                   x.Last().SomeString == "visited";
+
+            Func<Parent, bool> isOk = p => p.TestInt == 100 &&
+                   p.TestString == "aaaaaametadata" &&
+                   p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   p.CommonType1.CommonString == "..." &&
+                   p.Child.CommonType1.CommonString == "..." &&
+                   p.Child.ChildLevel1.ChildLevel2.TestCommonType.CommonString == "..." &&
+                   isCollectionOK(p.CollectionChild.TestIList) &&
+                   isCollectionOK(p.CollectionChild.TestICollection) &&
+                   isCollectionOK(p.CollectionChild.TestList) &&
+                   isCollectionOK(p.CollectionChild.TestCollection) &&
+                   isCollectionOK(p.CollectionChild.TestArray);
+
+
+            Assert.IsTrue(isOk(_sample) && _values.Count == 26);
+        }
+
+        [TestMethod]
+        public void TypeWalker_Visit_Depth2_SampleOk()
+        {
+            //Act
+
+            _visitor.Visit(_sample, _blueprint, 2, new InstanceGuard(), _values);
+
+            //Assert
+
+            Func<IEnumerable<ClassLevel1>, bool> isCollectionOK = x =>
+                   x.Count() == 2 &&
+                   x.First().ClassLevel2.TestCommonType.CommonString == "njunjnu" && //this property is on level 2 / depth 3, should not be touched
+                   x.First().SomeString == "visited" &&
+                   x.Last().ClassLevel2.TestCommonType.CommonString == "njunjnu" && //this property is on level 2 / depth 3, should not be touched
+                   x.Last().SomeString == "visited";
+
+            Func<Parent, bool> isOk = p => p.TestInt == 100 &&
+                   p.TestString == "aaaaaametadata" &&
+                   p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   p.CommonType1.CommonString == "..." &&
+                   p.Child.CommonType1.CommonString == "..." &&
+                   p.Child.ChildLevel1.ChildLevel2.TestCommonType.CommonString == "njunjnu" && //this property is on level 2 / depth 3, should not be touched
+                   isCollectionOK(p.CollectionChild.TestIList) &&
+                   isCollectionOK(p.CollectionChild.TestICollection) &&
+                   isCollectionOK(p.CollectionChild.TestList) &&
+                   isCollectionOK(p.CollectionChild.TestCollection) &&
+                   isCollectionOK(p.CollectionChild.TestArray);
+
+
+            Assert.IsTrue(isOk(_sample) && _values.Count == 15);
+        }
+
+        [TestMethod]
+        public void TypeWalker_Visit_Depth2_BlueprintOk()
+        {
+            //Act
+
+            _visitor.Visit(_sample, _blueprint, 2, new InstanceGuard(), _values);
+
+            //Assert
+
+            Func<IEnumerable<ClassLevel1>, bool> isCollectionOK = x =>
+                   x.Count() == 2 &&
+                   x.First().ClassLevel2.TestCommonType == null && //this property is on level 2 / depth 3, should not be blueprinted, as original was not visited
+                   x.First().SomeString == "visited" &&
+                   x.Last().ClassLevel2.TestCommonType == null && //this property is on level 2 / depth 3, should not be touched, as original was not visited
+                   x.Last().SomeString == "visited";
+
+            Func<Parent, bool> isOk = p => p.TestInt == 100 &&
+                   p.TestString == "aaaaaametadata" &&
+                   p.Child.TestDate1.Year == DateTime.Now.Year + 10 &&
+                   p.CommonType1.CommonString == "..." &&
+                   p.Child.CommonType1.CommonString == "..." &&
+                   p.Child.ChildLevel1.ChildLevel2.TestCommonType == null && //this property is on level 2 / depth 3, should not be touched, as original was not visited
+                   isCollectionOK(p.CollectionChild.TestIList) &&
+                   isCollectionOK(p.CollectionChild.TestICollection) &&
+                   isCollectionOK(p.CollectionChild.TestList) &&
+                   isCollectionOK(p.CollectionChild.TestCollection) &&
+                   isCollectionOK(p.CollectionChild.TestArray);
+
+
+            Assert.IsTrue(isOk(_blueprint) && _values.Count == 15);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OutOfMemoryException))]
+        public void TypeWalker_Visit_All_NoInstanceGuard()
+        {
+            //Act
+
+            _visitor.Visit(_sample, blueprint: _blueprint, guard: null, values: _values);
+        }
+
+        [TestMethod]
+
+        public void TypeWalker_Visit_All_NoValues()
+        {
+            //Act
+
+            _visitor.Visit(_sample, _blueprint, 10, new InstanceGuard(), null);
+
+            //Assert (Since we came here without values parameter, test is passed).
         }
     }
 
@@ -103,14 +341,8 @@ namespace ExpressWalker.Test
 
         public CommonType CommonType1 { get; set; }
 
-        public IList<Class3> TestIList { get; set; }
-
-        public ICollection<Class3> TestICollection { get; set; }
-
-        public List<Class3> TestList { get; set; }
-
-        public ICollection<Class3> TestCollection { get; set; }
-    }
+        public CollectionChild CollectionChild { get; set; }
+}
 
     public class Child
     {
@@ -126,28 +358,53 @@ namespace ExpressWalker.Test
 
         public CommonType CommonType1 { get; set; }
 
-        public CollectionItem[] Items { get; set; }
-
         public EnumTest Enum1 { get; set; }
 
         public EnumTest? Enum2 { get; set; }
+
+        public ChildLevel1 ChildLevel1 { get; set; }
+    }
+
+    public class ChildLevel1
+    {
+        public ChildLevel2 ChildLevel2 { get; set; }
+    }
+
+    public class ChildLevel2
+    { 
+        public CommonType TestCommonType { get; set; }
+    }
+
+
+
+    public class CollectionChild
+    {
+        public IList<ClassLevel1> TestIList { get; set; }
+
+        public ICollection<ClassLevel1> TestICollection { get; set; }
+
+        public List<ClassLevel1> TestList { get; set; }
+
+        public ICollection<ClassLevel1> TestCollection { get; set; }
+
+        public ClassLevel1[]  TestArray{ get; set; }
+    }
+
+    public class ClassLevel1
+    {
+        public string SomeString { get; set; }
+
+        public ClassLevel2 ClassLevel2 { get; set; }
+    }
+
+    public class ClassLevel2
+    {
+        public CommonType TestCommonType { get; set; }
     }
 
     public class CommonType
     {
         public string CommonString { get; set; }
-    }
-
-    public class CollectionItem
-    {
-        public string TestItemString { get; set; }
-
-        public CommonType CommonType1Test { get; set; }
-    }
-
-    public class Class3
-    {
-        public CommonType TestCommonType { get; set; }
     }
 
     public enum EnumTest
