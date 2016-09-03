@@ -46,6 +46,7 @@
     <Compile Include="Cloners\InstanceCloner.cs" />
     <Compile Include="Cloners\ArrayCloner.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Helpers\PropertyGuard.cs" />
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\[Util].cs" />
     <Compile Include="Visitors\CollectionVisitor.cs" />

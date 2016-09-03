@@ -12,8 +12,8 @@ namespace ExpressWalker.Test
         {
             //Act
 
-            //var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(30);
-            //visitor.Visit(new Document());
+            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(50);
+            visitor.Visit(new Document());
         }
     }
 
