@@ -35,21 +35,28 @@ namespace ExpressWalker
 
         private bool IsRepeating(int hash)
         {
-            //var matches = _path.Where(h => h == hash).Count();
+            if (_path.Count < 1)
+            {
+                return _path.All(h => h != hash);
+            }
 
-            //if (_path.Count == 0)
-            //{
-            //    return !_path.Any(h => h == hash);
-            //}
+            var reverseIndex = 1;
 
-            //var currentIndex = 1;
+            while (reverseIndex < _path.Count / 2)
+            {
+                var currentIndex = _path.Count - reverseIndex;
 
-            //var matchingIndex = 0;
+                var doubleIndex = currentIndex * 2;
 
-            //while (currentIndex < _path.Count / 2 && matchingIndex == 0)
-            //{
-            //    currentIndex++;
-            //}
+                if (hash == _path[currentIndex] && _path[currentIndex] == _path[doubleIndex])
+                {
+                    //[cnt-1, cnt-curr+1] == [cnt-curr-1, cnt-curr*2+1]
+                      
+                    //TODO: compare sequences. If are equal, exit and return true;
+                }
+
+                reverseIndex++;
+            }
 
             return false;
         }
