@@ -52,7 +52,7 @@ namespace ExpressWalker
                 {
                     //[cnt-1, cnt-curr+1] == [cnt-curr-1, cnt-curr*2+1]
                       
-                    //TODO: compare sequences. If are equal, exit and return true;
+                    //TODO: compare sequences. If are equal, exit and return true;;
                 }
 
                 reverseIndex++;
