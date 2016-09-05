@@ -39,12 +39,12 @@ namespace ExpressWalker
 
         public IVisitor Build(int depth = Constants.MaxDepth, PropertyGuard guard = null)
         {
-            var visitor = new ElementVisitor<TRootType>(null);
-            Build(visitor, depth, guard);
+            var visitor = new ElementVisitor<TRootType>(null, null, guard);
+            Build(visitor, depth);
             return visitor;
         }
 
-        private void Build(ElementVisitor visitor, int depth, PropertyGuard guard = null)
+        private void Build(ElementVisitor visitor, int depth)
         {
             if (depth > Constants.MaxDepth)
             {
@@ -60,8 +60,6 @@ namespace ExpressWalker
 
             foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                
-
                 //Trying to find property match, first by name, owner type and property type. If not found, we will try only with property type.
 
                 var match = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name && p.PropertyType == property.PropertyType);
@@ -81,15 +79,6 @@ namespace ExpressWalker
                     continue;
                 }
 
-                //if (guard != null)
-                //{
-                //    if (guard.IsGuarded(property))
-                //    {
-                //        continue;
-                //    }
-                //    guard.Guard(property);
-                //}
-
                 //If property type is not primitive, we will assume we should add it as an element/collection, but after it's being built and turns out it's 'empty', we will remove it.
 
                 if (Util.IsDictionary(property.PropertyType))
@@ -107,7 +96,7 @@ namespace ExpressWalker
 
                     var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name);
 
-                    Build(childVisitor, depth - 1, guard.Copy());
+                    Build(childVisitor, depth - 1);
 
                     if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
@@ -118,7 +107,7 @@ namespace ExpressWalker
                 {
                     var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
 
-                    Build(childVisitor, depth - 1, guard.Copy());
+                    Build(childVisitor, depth - 1);
 
                     if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {

@@ -45,6 +45,8 @@ namespace ExpressWalker
 
         protected HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
 
+        
+
         public override Type ElementType { get { return typeof(TElement); } }
 
         public override string ElementName { get; protected set; }
@@ -55,21 +57,20 @@ namespace ExpressWalker
 
         public override bool AnyProperty { get { return _propertyVisitors.Any(); } }
 
-        protected ElementVisitor()
+        public PropertyGuard Guard { get; protected set; }
+
+        protected ElementVisitor(PropertyGuard guard)
         {
             _elementVisitors = new HashSet<IElementVisitor>();
 
             _collectionVisitors = new HashSet<IElementVisitor>();
 
             _propertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
+
+            Guard = guard;
         }
 
-        public ElementVisitor(Type ownerType) : this(ownerType, null)
-        {
-            
-        }
-
-        public ElementVisitor(Type ownerType, string elementName) : this()
+        public ElementVisitor(Type ownerType, string elementName = null, PropertyGuard guard = null) : this(guard)
         {
             ElementName = elementName;
 
@@ -220,7 +221,21 @@ namespace ExpressWalker
                 throw new ArgumentException(string.Format("Element visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), childElementName));
             }
 
-            var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), childElementName);
+            PropertyGuard guard = null; 
+            if (Guard != null)
+            {
+                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
+
+                //if (Guard.IsRepeating(typeof(TChildElement), childElementName))
+                //{
+                //    return null;
+                //}
+
+                guard = Guard.Copy();
+                guard.Add(typeof(TChildElement), childElementName);
+            }
+
+            var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), childElementName, guard);
             _elementVisitors.Add(elementVisitor);
             return elementVisitor;
         }
@@ -258,7 +273,21 @@ namespace ExpressWalker
                 throw new ArgumentException(string.Format("Collection visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), collectionName));
             }
 
-            var collectionVisitor = new CollectionVisitor<TChildElement>(typeof(TElement), collectionType, collectionName);
+            PropertyGuard guard = null;
+            if (Guard != null)
+            {
+                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
+
+                //if (Guard.IsRepeating(typeof(TChildElement), collectionName))
+                //{
+                //    return null;
+                //}
+
+                guard = Guard.Copy();
+                guard.Add(typeof(TChildElement), collectionName);
+            }
+
+            var collectionVisitor = new CollectionVisitor<TChildElement>(typeof(TElement), collectionType, collectionName, guard);
             _collectionVisitors.Add(collectionVisitor);
             return collectionVisitor;
         }

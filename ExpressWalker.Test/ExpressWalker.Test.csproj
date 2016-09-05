@@ -57,6 +57,7 @@
     <Compile Include="ManualWalkerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ClonerInstanceTest.cs" />
+    <Compile Include="PropertyGuardTest.cs" />
     <Compile Include="StressTest.cs" />
     <Compile Include="TypeWalkerTest.cs" />
     <Compile Include="UtilTest.cs" />

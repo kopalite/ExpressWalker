@@ -5,12 +5,7 @@ namespace ExpressWalker.Visitors
 {
     internal sealed class CollectionVisitor<TElement> : ElementVisitor<TElement>
     {
-        public CollectionVisitor(Type ownerType, Type collectionType) : this(ownerType, collectionType, null)
-        {
-
-        }
-
-        public CollectionVisitor(Type ownerType, Type collectionType, string elementName) : base()
+        public CollectionVisitor(Type ownerType, Type collectionType, string elementName = null, PropertyGuard guard = null) : base(guard)
         {
             ElementName = elementName;
                 

@@ -1,10 +1,11 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
+using System;
 
 namespace ExpressWalker
 {
-    public class PropertyGuard
+    public class PropertyGuard 
     {
         private List<int> _path;
 
@@ -18,44 +19,52 @@ namespace ExpressWalker
             _path = new List<int>(path);
         }
 
-        public void Next(PropertyInfo property)
+        public void Add(Type declaringType, string propertyName)
         {
-            if (property == null)
-            {
-                return;
-            }
+            var hash = GetHash(declaringType.FullName, propertyName);
+            
+            _path.Add(hash);
+        }
 
-            var hash = GetHash(property.DeclaringType.FullName, property.Name);
+        public bool IsRepeating(Type declaringType, string propertyName)
+        {
+            var hash = GetHash(declaringType.FullName, propertyName);
 
-            if (!IsRepeating(hash))
-            {
-                _path.Add(hash);
-            }
+            return IsRepeating(hash);
         }
 
         private bool IsRepeating(int hash)
         {
-            if (_path.Count < 1)
+            var count = _path.Count;
+
+            if (count <= 1)
             {
-                return _path.All(h => h != hash);
+                return false;
             }
 
-            var reverseIndex = 1;
+            var sliceLength = 1;
 
-            while (reverseIndex < _path.Count / 2)
+            //Trying to detect if there is same repeated sequence (slice) of elements that starts with the 'hash' value.
+
+            while (sliceLength <= count / 2)
             {
-                var currentIndex = _path.Count - reverseIndex;
+                var currentIndex = count - sliceLength;
 
-                var doubleIndex = currentIndex * 2;
+                var doubledIndex = count - (sliceLength * 2);
 
-                if (hash == _path[currentIndex] && _path[currentIndex] == _path[doubleIndex])
+                if (hash == _path[currentIndex] && _path[currentIndex] == _path[doubledIndex])
                 {
-                    //[cnt-1, cnt-curr+1] == [cnt-curr-1, cnt-curr*2+1]
-                      
-                    //TODO: compare sequences. If are equal, exit and return true;;
+                    var currentSequence = _path.Skip(currentIndex).Take(sliceLength);
+
+                    var doubledSequence = _path.Skip(doubledIndex).Take(sliceLength);
+
+                    if (currentSequence.SequenceEqual(doubledSequence))
+                    {
+                        return true;
+                    }
                 }
 
-                reverseIndex++;
+                sliceLength++;
             }
 
             return false;
@@ -66,7 +75,7 @@ namespace ExpressWalker
             return new PropertyGuard(_path);
         }
 
-        public int GetHash(string declaringType, string propertyName)
+        private int GetHash(string declaringType, string propertyName)
         {
             return string.Format("{0}|{1}", declaringType, propertyName).GetHashCode();
         }
