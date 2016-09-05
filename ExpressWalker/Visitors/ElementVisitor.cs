@@ -226,10 +226,10 @@ namespace ExpressWalker
             {
                 //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
 
-                //if (Guard.IsRepeating(typeof(TChildElement), childElementName))
-                //{
-                //    return null;
-                //}
+                if (Guard.IsRepeating(typeof(TChildElement), childElementName))
+                {
+                    return null;
+                }
 
                 guard = Guard.Copy();
                 guard.Add(typeof(TChildElement), childElementName);
@@ -278,10 +278,10 @@ namespace ExpressWalker
             {
                 //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
 
-                //if (Guard.IsRepeating(typeof(TChildElement), collectionName))
-                //{
-                //    return null;
-                //}
+                if (Guard.IsRepeating(typeof(TChildElement), collectionName))
+                {
+                    return null;
+                }
 
                 guard = Guard.Copy();
                 guard.Add(typeof(TChildElement), collectionName);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ExpressWalker.Test
 {
@@ -12,10 +13,16 @@ namespace ExpressWalker.Test
         {
             //Act
 
-            //var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(50);
-            //visitor.Visit(new Document());
+            var watch = new Stopwatch();
+            watch.Start();
+            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(20, new PropertyGuard());
+            visitor.Visit(new Document());
+            watch.Stop();
+            var time = watch.ElapsedMilliseconds;
         }
     }
+
+    //15, 8300, 1800, allowed 3 cycles
 
     public class Document
     {

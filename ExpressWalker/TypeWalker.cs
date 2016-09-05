@@ -96,6 +96,11 @@ namespace ExpressWalker
 
                     var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name);
 
+                    if (childVisitor == null) //AddCollection() will return null in case of issues like circular reference.
+                    {
+                        continue;
+                    }
+
                     Build(childVisitor, depth - 1);
 
                     if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
@@ -106,6 +111,11 @@ namespace ExpressWalker
                 else
                 {
                     var childVisitor = visitor.AddElement(property.PropertyType, property.Name);
+
+                    if (childVisitor == null) //AddElement() will return null in case of issues like circular reference.
+                    {
+                        continue;
+                    }
 
                     Build(childVisitor, depth - 1);
 
