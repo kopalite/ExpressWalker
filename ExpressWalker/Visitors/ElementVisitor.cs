@@ -21,11 +21,11 @@ namespace ExpressWalker
 
         public abstract bool AnyProperty { get; }
 
-        public abstract ElementVisitor AddElement(Type elementType, string childElementName);
+        public abstract ElementVisitor AddElement(Type elementType, string childElementName, bool isHierarchy);
 
         public abstract void RemoveElement(Type elementType, string childElementName);
 
-        public abstract ElementVisitor AddCollection(Type elementType, Type collectionType, string collectionName);
+        public abstract ElementVisitor AddCollection(Type elementType, Type collectionType, string collectionName, bool isHierarchy);
 
         public abstract void RemoveCollection(Type collectionType, string collectionName);
 
@@ -59,7 +59,9 @@ namespace ExpressWalker
 
         public PropertyGuard Guard { get; protected set; }
 
-        protected ElementVisitor(PropertyGuard guard)
+        public bool IsHierarchy { get; protected set; }
+
+        protected ElementVisitor(PropertyGuard guard, bool isHierarchy)
         {
             _elementVisitors = new HashSet<IElementVisitor>();
 
@@ -68,9 +70,11 @@ namespace ExpressWalker
             _propertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
 
             Guard = guard;
+
+            IsHierarchy = isHierarchy;
         }
 
-        public ElementVisitor(Type ownerType, string elementName = null, PropertyGuard guard = null) : this(guard)
+        public ElementVisitor(Type ownerType, string elementName = null, PropertyGuard guard = null, bool isHierarchy = false) : this(guard, isHierarchy)
         {
             ElementName = elementName;
 
@@ -214,9 +218,13 @@ namespace ExpressWalker
 
     internal partial class ElementVisitor<TElement> : ElementVisitor
     {
-        internal IElementVisitor<TChildElement> AddElementVisitor<TChildElement>(string childElementName)
+        private static Type VisitorHierarchyAttributeType = typeof(VisitorHierarchyAttribute);
+
+        internal IElementVisitor<TChildElement> AddElementVisitor<TChildElement>(string childElementName, bool isHierarchy)
         {
-            if (_elementVisitors.Any(ev => ev.ElementType == typeof(TChildElement) && ev.ElementName == childElementName))
+            var childElementType = typeof(TChildElement);
+
+            if (_elementVisitors.Any(ev => ev.ElementType == childElementType && ev.ElementName == childElementName))
             {
                 throw new ArgumentException(string.Format("Element visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), childElementName));
             }
@@ -224,15 +232,15 @@ namespace ExpressWalker
             PropertyGuard guard = null; 
             if (Guard != null)
             {
-                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
+                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling ([VisitorHierarchy] is suppressing it).
 
-                if (Guard.IsRepeating(typeof(TChildElement), childElementName))
+                if (!isHierarchy && Guard.IsRepeating(childElementType, childElementName))
                 {
                     return null;
                 }
 
                 guard = Guard.Copy();
-                guard.Add(typeof(TChildElement), childElementName);
+                guard.Add(childElementType, childElementName);
             }
 
             var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), childElementName, guard);
@@ -240,11 +248,11 @@ namespace ExpressWalker
             return elementVisitor;
         }
 
-        public override ElementVisitor AddElement(Type elementType, string childElementName)
+        public override ElementVisitor AddElement(Type elementType, string childElementName, bool isHierarchy)
         {
-            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddElementVisitor", BindingFlags.NonPublic | BindingFlags.Instance);
+            var methodDef = AddElementVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
-            var visitor = (ElementVisitor)method.Invoke(this, new[] { childElementName });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { childElementName, isHierarchy });
             return visitor;
         }
 
@@ -260,15 +268,17 @@ namespace ExpressWalker
 
         public override void RemoveElement(Type elementType, string childElementName)
         {
-            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("RemoveElementVisitor", BindingFlags.NonPublic | BindingFlags.Instance);
+            var methodDef = RemoveElementVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
             method.Invoke(this, new[] { childElementName });
             
         }
 
-        internal IElementVisitor<TChildElement> AddCollectionVisitor<TChildElement>(Type collectionType, string collectionName)
+        internal IElementVisitor<TChildElement> AddCollectionVisitor<TChildElement>(Type collectionType, string collectionName, bool isHierarchy)
         {
-            if (_collectionVisitors.Any(ev => ev.ElementType == typeof(TChildElement) && ev.ElementName == collectionName))
+            var childElementType = typeof(TChildElement);
+
+            if (_collectionVisitors.Any(ev => ev.ElementType == childElementType && ev.ElementName == collectionName))
             {
                 throw new ArgumentException(string.Format("Collection visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), collectionName));
             }
@@ -276,15 +286,15 @@ namespace ExpressWalker
             PropertyGuard guard = null;
             if (Guard != null)
             {
-                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling.
+                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling ([VisitorHierarchy] is suppressing it).
 
-                if (Guard.IsRepeating(typeof(TChildElement), collectionName))
+                if (!isHierarchy && Guard.IsRepeating(childElementType, collectionName))
                 {
                     return null;
                 }
 
                 guard = Guard.Copy();
-                guard.Add(typeof(TChildElement), collectionName);
+                guard.Add(childElementType, collectionName);
             }
 
             var collectionVisitor = new CollectionVisitor<TChildElement>(typeof(TElement), collectionType, collectionName, guard);
@@ -292,11 +302,11 @@ namespace ExpressWalker
             return collectionVisitor;
         }
 
-        public override ElementVisitor AddCollection(Type elementType, Type collectionType, string collectionName)
+        public override ElementVisitor AddCollection(Type elementType, Type collectionType, string collectionName, bool isHierarchy)
         {
-            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddCollectionVisitor", BindingFlags.NonPublic | BindingFlags.Instance);
+            var methodDef = AddCollectionVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
-            var visitor = (ElementVisitor)method.Invoke(this, new object[] { collectionType, collectionName });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { collectionType, collectionName, isHierarchy });
             return visitor;
         }
 
@@ -312,16 +322,18 @@ namespace ExpressWalker
 
         public override void RemoveCollection(Type elementType, string collectionName)
         {
-            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("RemoveCollectionVisitor", BindingFlags.NonPublic | BindingFlags.Instance);
+            var methodDef = RemoveCollectionVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
             method.Invoke(this, new[] { collectionName });
         }
 
         internal IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Func<TProperty, object, TProperty>> getNewValue)
         {
-            if (_propertyVisitors.Any(pv => pv.ElementType == typeof(TElement) && pv.PropertyName == propertyName))
+            var elementType = typeof(TElement);
+
+            if (_propertyVisitors.Any(pv => pv.ElementType == elementType && pv.PropertyName == propertyName))
             {
-                throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), propertyName));
+                throw new ArgumentException(string.Format("Property visitor for type '{0}' and name '{1}' is already added!", elementType, propertyName));
             }
 
             var propertyVisitor = new PropertyVisitor<TElement, TProperty>(propertyName, getNewValue, GetPropertyMetadata(propertyName));
@@ -331,7 +343,7 @@ namespace ExpressWalker
 
         public override ElementVisitor AddProperty(Type propertyType, string propertyName, Expression getNewValue)
         {
-            var methodDef = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor", BindingFlags.NonPublic | BindingFlags.Instance);
+            var methodDef = AddPropertyVisitorMethod;
             var method = methodDef.MakeGenericMethod(propertyType);
             var visitor = (ElementVisitor)method.Invoke(this, new object[] { propertyName, getNewValue });
             return visitor;
@@ -341,8 +353,23 @@ namespace ExpressWalker
         {
             var elementType = typeof(TElement);
             var property = elementType.GetProperty(propertyName);
-            var metadataAttribute = (VisitorMetadataAttribute)property.GetCustomAttributes(typeof(VisitorMetadataAttribute), false).FirstOrDefault();
+            var metadataAttribute = property.GetCustomAttribute<VisitorMetadataAttribute>(false);
             return (metadataAttribute == null) ? null : metadataAttribute.Metadata;
         }
+
+        private static MethodInfo _addElementVisitorMethod;
+        private static MethodInfo AddElementVisitorMethod { get { return _addElementVisitorMethod ?? (_addElementVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("AddElementVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _removeElementVisitorMethod;
+        private static MethodInfo RemoveElementVisitorMethod { get { return _removeElementVisitorMethod ?? (_removeElementVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("RemoveElementVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _addCollectionVisitorMethod;
+        private static MethodInfo AddCollectionVisitorMethod { get { return _addCollectionVisitorMethod ?? (_addCollectionVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("AddCollectionVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _removeCollectionVisitorMethod;
+        private static MethodInfo RemoveCollectionVisitorMethod { get { return _removeCollectionVisitorMethod ?? (_removeCollectionVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("RemoveCollectionVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _addPropertyVisitorMethod;
+        private static MethodInfo AddPropertyVisitorMethod { get { return _addPropertyVisitorMethod ?? (_addPropertyVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
     }
 }

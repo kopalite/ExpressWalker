@@ -24,7 +24,7 @@ namespace ExpressWalker
 
             var myElement = (ElementVisitor<TElement>)element;
             var extractedName = Util.NameOf(childElementName);
-            var childElement = myElement.AddElementVisitor<TChildElement>(extractedName);
+            var childElement = myElement.AddElementVisitor<TChildElement>(extractedName, false);
 
             if (childElementSetup != null)
             {
@@ -47,7 +47,7 @@ namespace ExpressWalker
             var myElement = (ElementVisitor<TElement>)element;
             var extractedName = Util.NameOf(childElementName);
             var extractedType = Util.TypeOf(childElementName);
-            var collectionElement = myElement.AddCollectionVisitor<TCollectionElement>(extractedType, extractedName);
+            var collectionElement = myElement.AddCollectionVisitor<TCollectionElement>(extractedType, extractedName, false);
 
             if (childElementSetup != null)
             {

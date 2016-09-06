@@ -1,7 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using ExpressWalker.Visitors;
+using FizzWare.NBuilder;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ExpressWalker.Test
 {
@@ -9,20 +12,141 @@ namespace ExpressWalker.Test
     public class StressTest
     {
         [TestMethod]
-        public void TypeWalker_Stress_Test()
+        public void TypeWalker_StressTest_ComplexCircularReference_Build()
         {
+            //Arrange
+
+            var watch1 = new Stopwatch();
+            var watch2 = new Stopwatch();
+
             //Act
 
+            watch1.Start();
+            var visitor1 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(15, new PropertyGuard());
+            watch1.Stop();
+
+            watch2.Start();
+            var visitor2 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(15, new PropertyGuard());
+            watch2.Stop();
+
+            //Assert
+            Assert.IsTrue(watch1.ElapsedMilliseconds <= 8000);
+            Assert.IsTrue(watch2.ElapsedMilliseconds <= 8000);
+        }
+
+        [TestMethod]
+        public void TypeWalker_StressTest_ComplexCircularReference_Visit()
+        {
+            //Arrange
+
             var watch = new Stopwatch();
+            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
+            var values = new HashSet<PropertyValue>();
+            var document = GetComplexSample();
+
+            //Act
+
             watch.Start();
-            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(20, new PropertyGuard());
-            visitor.Visit(new Document());
+            visitor.Visit(document, depth:10, guard:new InstanceGuard(), values:values);
             watch.Stop();
-            var time = watch.ElapsedMilliseconds;
+
+            //Assert
+            Assert.IsTrue(values.Count == 90 && values.All(x => ((DateTime)x.NewValue).Year == DateTime.Now.Year + 10));
+        }
+
+        [TestMethod]
+        public void TypeWalker_StressTest_AllowedHierarchy_Visit()
+        {
+            //Arrange
+
+            var visitor = TypeWalker<AllowedHierarchy>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
+
+            var hierarchy = Builder<AllowedHierarchy>.CreateListOfSize(10).BuildHierarchy(new HierarchySpec<AllowedHierarchy>
+            {
+                Depth = 5,
+                MaximumChildren = 1,
+                MinimumChildren = 1,
+                NumberOfRoots = 1,
+                AddMethod = (x1, x2) => x1.Child = x2
+            }).First();
+
+            //Act
+
+            //Assert
+        }
+
+        [TestMethod]
+        public void TypeWalker_StressTest_SuppressedHierarchy_Visit()
+        {
+            //Arrange
+
+            var visitor = TypeWalker<SuppressedHierarchy>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
+
+            var hierarchy = Builder<SuppressedHierarchy>.CreateListOfSize(10).BuildHierarchy(new HierarchySpec<SuppressedHierarchy>
+            {
+                Depth = 5,
+                MaximumChildren = 1,
+                MinimumChildren = 1,
+                NumberOfRoots = 1,
+                AddMethod = (x1, x2) => x1.Child = x2
+            }).First();
+
+
+            //Act
+
+            //Assert
+        }
+
+        private Document GetComplexSample()
+        {
+            var document = Builder<Document>.CreateNew()
+
+
+                               .With(x => x.DocumentDefaultUser1, Builder<User>.CreateNew()
+                                           .With(x => x.User_UserToRole, Builder<UserToRole>.CreateNew()
+                                                                            .With(y => y.UserToRole_User, Builder<User>.CreateNew().Build())
+                                                                            .With(x => x.UserToRole_Role, Builder<Role>.CreateNew().Build())
+                                           .Build())
+                               .Build())
+
+                               .With(x => x.DocumentDefaultRole1, Builder<Role>.CreateNew()
+                                           .With(x => x.Role_UserToRoleList, Builder<UserToRole>.CreateListOfSize(2).All()
+                                                                                                        .With(x => x.UserToRole_User, Builder<User>.CreateNew()
+                                                                                                        .Build())
+                                           .Build())
+
+                               .With(x => x.Role_Profile, Builder<Profile>.CreateNew()
+                                                                .With(x => x.Profile_OperationsList, Builder<OperationToProfile>.CreateListOfSize(5).All()
+                                                                                                          .With(x => x.OperationToProfile_Operation, Builder<Operation>.CreateNew().Build())
+                                                                                                          .Build())
+                                                                .Build())
+                               .Build())
+
+                               .With(x => x.DocumentDefaultUnit1, Builder<Unit>.CreateNew()
+                                                                       .With(x => x.Unit_Roles, Builder<Role>.CreateListOfSize(2).All()
+                                                                                                   .With(x => x.Role_UserToRoleList, Builder<UserToRole>.CreateListOfSize(1).All()
+                                                                                                                                       .With(x => x.UserToRole_User, Builder<User>.CreateNew()
+                                                                                                                                       .Build())
+                                                                                                   .Build())
+                                                                       .Build())
+                               .Build())
+
+                               .With(x => x.DocumentDefaultUnit2, Builder<Unit>.CreateListOfSize(10).BuildHierarchy(new HierarchySpec<Unit>
+                               {
+                                   Depth = 5,
+                                   MaximumChildren = 1,
+                                   MinimumChildren = 1,
+                                   NumberOfRoots = 1,
+                                   AddMethod = (x1, x2) => x1.Unit_ParentUnit = x2
+                               }).First())
+
+                           .Build();
+
+            return document;
         }
     }
 
-    //15, 8300, 1800, allowed 3 cycles
+    
 
     public class Document
     {
@@ -38,6 +162,8 @@ namespace ExpressWalker.Test
         public DateTime TestDocumentDateTime4 { get; set; }
         public DateTime TestDocumentDateTime5 { get; set; }
     }
+
+    
 
     public class User
     {
@@ -83,6 +209,8 @@ namespace ExpressWalker.Test
         public int TestRoleInt5 { get; set; }
 
         public IList<UserToRole> Role_UserToRoleList { get; set; }
+
+        public Profile Role_Profile { get; set; }
     }
 
     public class Unit
@@ -105,6 +233,7 @@ namespace ExpressWalker.Test
         public int TestUnitInt4 { get; set; }
         public int TestUnitInt5 { get; set; }
 
+        [VisitorHierarchy]
         public Unit Unit_ParentUnit { get; set; }
 
         public IList<Role> Unit_Roles { get; set; }
@@ -112,23 +241,25 @@ namespace ExpressWalker.Test
 
     public class Profile
     {
-        public string TestOperationString1 { get; set; }
-        public string TestOperationString2 { get; set; }
-        public string TestOperationString3 { get; set; }
-        public string TestOperationString4 { get; set; }
-        public string TestOperationString5 { get; set; }
+        public string TestProfileString1 { get; set; }
+        public string TestProfileString2 { get; set; }
+        public string TestProfileString3 { get; set; }
+        public string TestProfileString4 { get; set; }
+        public string TestProfileString5 { get; set; }
 
-        public DateTime TestOperationDateTime1 { get; set; }
-        public DateTime TestOperationDateTime2 { get; set; }
-        public DateTime TestOperationDateTime3 { get; set; }
-        public DateTime TestOperationDateTime4 { get; set; }
-        public DateTime TestOperationDateTime5 { get; set; }
+        public DateTime TestProfileDateTime1 { get; set; }
+        public DateTime TestProfileDateTime2 { get; set; }
+        public DateTime TestProfileDateTime3 { get; set; }
+        public DateTime TestProfileDateTime4 { get; set; }
+        public DateTime TestProfileDateTime5 { get; set; }
 
-        public int TestOperationInt1 { get; set; }
-        public int TestOperationInt2 { get; set; }
-        public int TestOperationInt3 { get; set; }
-        public int TestOperationInt4 { get; set; }
-        public int TestOperationInt5 { get; set; }
+        public int TestProfileInt1 { get; set; }
+        public int TestProfileInt2 { get; set; }
+        public int TestProfileInt3 { get; set; }
+        public int TestProfileInt4 { get; set; }
+        public int TestProfileInt5 { get; set; }
+
+        public IList<OperationToProfile> Profile_OperationsList { get; set; }
     }
 
     public class UserToRole
@@ -168,5 +299,21 @@ namespace ExpressWalker.Test
     {
         public Operation OperationToProfile_Operation { get; set; }
         public Profile OperationToProfile_Profile { get; set; }
+    }
+
+    public class AllowedHierarchy
+    {
+        public DateTime DateTime1 { get; set; }
+
+        [VisitorHierarchy]
+        public AllowedHierarchy Child { get; set; }
+    }
+
+    public class SuppressedHierarchy
+    {
+        public DateTime DateTime1 { get; set; }
+
+        //[VisitorHierarchy]
+        public SuppressedHierarchy Child { get; set; }
     }
 }
