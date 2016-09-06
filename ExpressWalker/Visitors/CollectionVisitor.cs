@@ -5,7 +5,11 @@ namespace ExpressWalker.Visitors
 {
     internal sealed class CollectionVisitor<TElement> : ElementVisitor<TElement>
     {
-        public CollectionVisitor(Type ownerType, Type collectionType, string elementName = null, PropertyGuard guard = null, bool isHierarchy = false) : base(guard, isHierarchy)
+        public CollectionVisitor(Type ownerType, 
+                                 Type collectionType, 
+                                 string elementName = null, 
+                                 PropertyGuard guard = null, 
+                                 bool supportsCloning = true) : base(guard, supportsCloning)
         {
             ElementName = elementName;
                 
@@ -13,8 +17,11 @@ namespace ExpressWalker.Visitors
             {
                 _elementAccessor = ExpressAccessor.Create(ownerType, collectionType, elementName);
             }
-            
-            _elementCloner = ClonerBase.Create(collectionType);
+
+            if (SupportsCloning)
+            {
+                _elementCloner = ClonerBase.Create(collectionType);
+            }
         }
     }
 }

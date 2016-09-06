@@ -7,22 +7,22 @@ namespace ExpressWalker.Helpers
 {
     internal class ReflectionCache
     {
-        private static Dictionary<string, TypeData> TypeData = new Dictionary<string, TypeData>();
+        private static Dictionary<string, TypeProperties> TypeProperties = new Dictionary<string, TypeProperties>();
 
         private static Dictionary<string, TypeInfo> TypeInfo = new Dictionary<string, TypeInfo>();
 
-        public static TypeData GetData(Type type)
+        public static TypeProperties GetProperties(Type type)
         {
-            TypeData data = null;
+            TypeProperties properties = null;
 
-            if (!TypeData.TryGetValue(type.FullName, out data))
+            if (!TypeProperties.TryGetValue(type.FullName, out properties))
             {
-                data = new TypeData(type);
+                properties = new TypeProperties(type);
 
-                TypeData.Add(type.FullName, data);
+                TypeProperties.Add(type.FullName, properties);
             }
 
-            return data;
+            return properties;
         }
 
         public static TypeInfo GetInfo(Type type)
@@ -41,17 +41,17 @@ namespace ExpressWalker.Helpers
 
         public void Reset()
         {
-            TypeData.Clear();
+            TypeProperties.Clear();
         }
     }
 
-    internal class TypeData
+    internal class TypeProperties
     {
         public TypeInfo TypeInfo { get; private set; }
 
         public Dictionary<string, PropertyData> Properties { get; private set; }
 
-        public TypeData(Type type)
+        public TypeProperties(Type type)
         {
             TypeInfo = ReflectionCache.GetInfo(type);
 

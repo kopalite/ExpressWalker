@@ -59,9 +59,9 @@ namespace ExpressWalker
 
         public PropertyGuard Guard { get; protected set; }
 
-        public bool IsHierarchy { get; protected set; }
+        public bool SupportsCloning { get; protected set; }
 
-        protected ElementVisitor(PropertyGuard guard, bool isHierarchy)
+        protected ElementVisitor(PropertyGuard guard, bool supportsCloning)
         {
             _elementVisitors = new HashSet<IElementVisitor>();
 
@@ -71,10 +71,13 @@ namespace ExpressWalker
 
             Guard = guard;
 
-            IsHierarchy = isHierarchy;
+            SupportsCloning = supportsCloning;
         }
 
-        public ElementVisitor(Type ownerType, string elementName = null, PropertyGuard guard = null, bool isHierarchy = false) : this(guard, isHierarchy)
+        public ElementVisitor(Type ownerType, 
+                              string elementName = null, 
+                              PropertyGuard guard = null, 
+                              bool supportsCloning = true) : this(guard, supportsCloning)
         {
             ElementName = elementName;
 
@@ -83,7 +86,10 @@ namespace ExpressWalker
                 _elementAccessor = ExpressAccessor.Create(ownerType, typeof(TElement), elementName);
             }
 
-            _elementCloner = ClonerBase.Create(typeof(TElement));
+            if (SupportsCloning)
+            {
+                _elementCloner = ClonerBase.Create(typeof(TElement));
+            }
         }
 
         public object Extract(object parent)
@@ -93,6 +99,11 @@ namespace ExpressWalker
 
         public object SetCopy(object parent, object element)
         {
+            if (!SupportsCloning)
+            {
+                throw new Exception("This visitor doesn't support cloning. Please build visitor by TypeWalker.Build(supportsHierarchy:true).");
+            }
+
             var blueprint = _elementCloner.Clone(element);
 
             _elementAccessor.Set(parent, blueprint);
@@ -243,7 +254,7 @@ namespace ExpressWalker
                 guard.Add(childElementType, childElementName);
             }
 
-            var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), childElementName, guard);
+            var elementVisitor = new ElementVisitor<TChildElement>(typeof(TElement), childElementName, guard, SupportsCloning);
             _elementVisitors.Add(elementVisitor);
             return elementVisitor;
         }
@@ -252,7 +263,7 @@ namespace ExpressWalker
         {
             var methodDef = AddElementVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
-            var visitor = (ElementVisitor)method.Invoke(this, new object[] { childElementName, isHierarchy });
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { childElementName, isHierarchy});
             return visitor;
         }
 
@@ -297,7 +308,7 @@ namespace ExpressWalker
                 guard.Add(childElementType, collectionName);
             }
 
-            var collectionVisitor = new CollectionVisitor<TChildElement>(typeof(TElement), collectionType, collectionName, guard);
+            var collectionVisitor = new CollectionVisitor<TChildElement>(typeof(TElement), collectionType, collectionName, guard, SupportsCloning);
             _collectionVisitors.Add(collectionVisitor);
             return collectionVisitor;
         }

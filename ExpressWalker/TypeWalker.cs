@@ -37,9 +37,25 @@ namespace ExpressWalker
             return this;
         }
 
-        public IVisitor Build(int depth = Constants.MaxDepth, PropertyGuard guard = null)
+        /// <summary>
+        /// Builds visitor for visiting <typeparamref name="TRootType"/> instance.
+        /// </summary>
+        /// <param name="depth">
+        /// The depth (level) of object graph that visitor will be able to visit. 
+        /// Decreases build performance for large values.
+        /// </param>
+        /// <param name="guard">
+        /// If given, property guard will significantly decrease build time by avoiding circular references between property types.
+        /// If you wish to use it and intencionaly allow obvious property type cycles like hierarchy structures, use [VisitorHierarchy] attribute on property that forms hierarchy.
+        /// </param>
+        /// <param name="supportsCloning">
+        /// In order to support object cloning while visiting in IVisitor.Visit() method, many cloning expressions should be built, which is very costly time-wise.
+        /// To significantly decrease build time of visitors that don't need to clone objects, set this parameter to false (omits cloning expressions creation).
+        /// </param>
+        /// <returns>IVisitor for visiting instances of type <typeparamref name="TRootType"/></returns>
+        public IVisitor Build(int depth = Constants.MaxDepth, PropertyGuard guard = null, bool supportsCloning = true)
         {
-            var visitor = new ElementVisitor<TRootType>(null, null, guard);
+            var visitor = new ElementVisitor<TRootType>(null, null, guard, supportsCloning);
             Build(visitor, depth);
             return visitor;
         }
@@ -58,7 +74,7 @@ namespace ExpressWalker
 
             var currentNodeType = visitor.ElementType;
 
-            foreach (var prop in ReflectionCache.GetData(currentNodeType).Properties.Values)
+            foreach (var prop in ReflectionCache.GetProperties(currentNodeType).Properties.Values)
             {
                 //Trying to find property match, first by name, owner type and property type. If not found, we will try only with property type.
 

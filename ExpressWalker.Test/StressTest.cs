@@ -22,16 +22,16 @@ namespace ExpressWalker.Test
             //Act
 
             watch1.Start();
-            var visitor1 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(15, new PropertyGuard());
+            var visitor1 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(10, new PropertyGuard(), false);
             watch1.Stop();
 
             watch2.Start();
-            var visitor2 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(15, new PropertyGuard());
+            var visitor2 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(10, new PropertyGuard(), false);
             watch2.Stop();
 
             //Assert
-            Assert.IsTrue(watch1.ElapsedMilliseconds <= 8000);
-            Assert.IsTrue(watch2.ElapsedMilliseconds <= 8000);
+            Assert.IsTrue(watch1.ElapsedMilliseconds <= 1000);
+            Assert.IsTrue(watch2.ElapsedMilliseconds <= 1000);
         }
 
         [TestMethod]
