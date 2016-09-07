@@ -54,7 +54,6 @@ namespace ExpressWalker.Test
             //Arrange
 
             var visitor = TypeWalker<AllowedHierarchy>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
-
             var hierarchy = Builder<AllowedHierarchy>.CreateListOfSize(10).BuildHierarchy(new HierarchySpec<AllowedHierarchy>
             {
                 Depth = 5,
@@ -63,10 +62,15 @@ namespace ExpressWalker.Test
                 NumberOfRoots = 1,
                 AddMethod = (x1, x2) => x1.Child = x2
             }).First();
+            var values = new HashSet<PropertyValue>();
 
             //Act
 
+            visitor.Visit(hierarchy, depth: 10, guard: new InstanceGuard(), values: values);
+
             //Assert
+
+            Assert.AreEqual(6, values.Count);
         }
 
         [TestMethod]
@@ -75,7 +79,6 @@ namespace ExpressWalker.Test
             //Arrange
 
             var visitor = TypeWalker<SuppressedHierarchy>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
-
             var hierarchy = Builder<SuppressedHierarchy>.CreateListOfSize(10).BuildHierarchy(new HierarchySpec<SuppressedHierarchy>
             {
                 Depth = 5,
@@ -84,11 +87,15 @@ namespace ExpressWalker.Test
                 NumberOfRoots = 1,
                 AddMethod = (x1, x2) => x1.Child = x2
             }).First();
-
+            var values = new HashSet<PropertyValue>();
 
             //Act
 
+            visitor.Visit(hierarchy, depth: 10, guard: new InstanceGuard(), values: values);
+
             //Assert
+
+            Assert.AreEqual(3, values.Count);
         }
 
         private Document GetComplexSample()
