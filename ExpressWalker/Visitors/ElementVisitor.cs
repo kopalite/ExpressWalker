@@ -1,4 +1,5 @@
 ﻿using ExpressWalker.Cloners;
+using ExpressWalker.Helpers;
 using ExpressWalker.Visitors;
 using System;
 using System.Collections;
@@ -288,8 +289,9 @@ namespace ExpressWalker
         internal IElementVisitor<TChildElement> AddCollectionVisitor<TChildElement>(Type collectionType, string collectionName, bool isHierarchy)
         {
             var childElementType = typeof(TChildElement);
+            var itemsType = Util.GetItemsType(childElementType);
 
-            if (_collectionVisitors.Any(ev => ev.ElementType == childElementType && ev.ElementName == collectionName))
+            if (_collectionVisitors.Any(ev => ev.ElementType == itemsType && ev.ElementName == collectionName))
             {
                 throw new ArgumentException(string.Format("Collection visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), collectionName));
             }
@@ -323,7 +325,8 @@ namespace ExpressWalker
 
         internal void RemoveCollectionVisitor<TChildElement>(string collectionName)
         {
-            var collectionVisitor = _collectionVisitors.FirstOrDefault(ev => ev.ElementType == typeof(TChildElement) && ev.ElementName == collectionName);
+            var itemsType = Util.GetItemsType(typeof(TChildElement));
+            var collectionVisitor = _collectionVisitors.FirstOrDefault(ev => ev.ElementType == itemsType && ev.ElementName == collectionName);
             if (collectionVisitor == null)
             {
                 throw new ArgumentException(string.Format("Collection visitor for type '{0}' and name '{1}' is not found!", typeof(TElement), collectionName));

@@ -162,6 +162,13 @@ namespace ExpressWalker.Test
         public DateTime TestDocumentDateTime3 { get; set; }
         public DateTime TestDocumentDateTime4 { get; set; }
         public DateTime TestDocumentDateTime5 { get; set; }
+
+        public IList<CollectionItem> Items { get; set; }
+    }
+
+    public class CollectionItem
+    {
+
     }
 
     

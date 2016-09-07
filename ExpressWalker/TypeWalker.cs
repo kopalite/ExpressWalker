@@ -121,7 +121,7 @@ namespace ExpressWalker
 
                     Build(childVisitor, depth - 1);
 
-                    if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
+                    if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
                         visitor.RemoveCollection(property.PropertyType, property.Name);
                     }
