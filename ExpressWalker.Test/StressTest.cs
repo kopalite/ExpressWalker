@@ -16,22 +16,16 @@ namespace ExpressWalker.Test
         {
             //Arrange
 
-            var watch1 = new Stopwatch();
-            var watch2 = new Stopwatch();
-
+            var watch = new Stopwatch();
+            
             //Act
 
-            watch1.Start();
+            watch.Start();
             var visitor1 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(10, new PropertyGuard(), false);
-            watch1.Stop();
-
-            watch2.Start();
-            var visitor2 = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now).Build(10, new PropertyGuard(), false);
-            watch2.Stop();
+            watch.Stop();
 
             //Assert
-            Assert.IsTrue(watch1.ElapsedMilliseconds <= 1000);
-            Assert.IsTrue(watch2.ElapsedMilliseconds <= 1000);
+            Assert.IsTrue(watch.ElapsedMilliseconds <= 1000);
         }
 
         [TestMethod]
@@ -40,7 +34,7 @@ namespace ExpressWalker.Test
             //Arrange
 
             var watch = new Stopwatch();
-            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard());
+            var visitor = TypeWalker<Document>.Create().ForProperty<DateTime>((x, m) => DateTime.Now.AddYears(10)).Build(10, new PropertyGuard(), false);
             var values = new HashSet<PropertyValue>();
             var document = GetComplexSample();
 

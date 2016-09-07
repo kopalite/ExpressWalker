@@ -74,41 +74,45 @@ namespace ExpressWalker
 
             var currentNodeType = visitor.ElementType;
 
-            foreach (var prop in ReflectionCache.GetProperties(currentNodeType).Properties.Values)
+            foreach (var property in currentNodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 //Trying to find property match, first by name, owner type and property type. If not found, we will try only with property type.
 
-                var match = _properties.FirstOrDefault(p => p.ElementType == prop.DeclaringType.RawType && p.PropertyName == prop.PropertyName && p.PropertyType == prop.PropertyType.RawType);
+                var match = _properties.FirstOrDefault(p => p.ElementType == property.DeclaringType && p.PropertyName == property.Name && p.PropertyType == property.PropertyType);
 
                 if (match == null)
                 {
-                    match = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == prop.PropertyType.RawType);
+                    match = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == property.PropertyType);
                 }
 
                 if (match != null)
                 {
-                    visitor.AddProperty(prop.PropertyType.RawType, prop.PropertyName, match.GetNewValue);
+                    visitor.AddProperty(property.PropertyType, property.Name, match.GetNewValue);
                 }
 
-                if (prop.PropertyType.IsSimpleType)
+                if (Util.IsSimpleType(property.PropertyType))
                 {
                     continue;
                 }
 
                 //If property type is not primitive, we will assume we should add it as an element/collection, but after it's being built and turns out it's 'empty', we will remove it.
 
-                if (prop.PropertyType.IsDictionary)
+                if (Util.IsDictionary(property.PropertyType))
                 {
                     //TODO: Finish dictionary visit configuration once it's supported.
                 }
-                else if (prop.PropertyType.IsGenericEnumerable || prop.PropertyType.ImplementsGenericIEnumerable)
+                else if (Util.IsGenericEnumerable(property.PropertyType) || Util.ImplementsGenericIEnumerable(property.PropertyType))
                 {
-                    if (prop.PropertyType.IsCollectionItemsTypeSimple)
+                    var collectionItemType = Util.GetItemsType(property.PropertyType);
+
+                    if (Util.IsSimpleType(collectionItemType))
                     {
                         continue;
                     }
 
-                    var childVisitor = visitor.AddCollection(prop.PropertyType.CollectionItemsType, prop.PropertyType.RawType, prop.PropertyName, prop.IsVisitorHierarchy);
+                    var isHierarchy = property.GetCustomAttribute<VisitorHierarchyAttribute>() != null;
+
+                    var childVisitor = visitor.AddCollection(collectionItemType, property.PropertyType, property.Name, isHierarchy);
 
                     if (childVisitor == null) //AddCollection() will return null in case of issues like circular reference.
                     {
@@ -119,12 +123,14 @@ namespace ExpressWalker
 
                     if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
-                        visitor.RemoveCollection(prop.PropertyType.RawType, prop.PropertyName);
+                        visitor.RemoveCollection(property.PropertyType, property.Name);
                     }
                 }
                 else
                 {
-                    var childVisitor = visitor.AddElement(prop.PropertyType.RawType, prop.PropertyName, prop.IsVisitorHierarchy);
+                    var isHierarchy = property.GetCustomAttribute<VisitorHierarchyAttribute>() != null;
+
+                    var childVisitor = visitor.AddElement(property.PropertyType, property.Name, isHierarchy);
 
                     if (childVisitor == null) //AddElement() will return null in case of issues like circular reference.
                     {
@@ -135,10 +141,82 @@ namespace ExpressWalker
 
                     if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
                     {
-                        visitor.RemoveElement(prop.PropertyType.RawType, prop.PropertyName);
+                        visitor.RemoveElement(property.PropertyType, property.Name);
                     }
                 }
             }
         }
+
+        /* TODO: check why ReflectionCache doesn't help performance in below's implementation of Build();
+        
+        //var currentNodeType = visitor.ElementType;
+
+            //foreach (var prop in ReflectionCache.GetProperties(currentNodeType).Properties.Values)
+            //{
+            //    //Trying to find property match, first by name, owner type and property type. If not found, we will try only with property type.
+
+            //    var match = _properties.FirstOrDefault(p => p.ElementType == prop.DeclaringType.RawType && p.PropertyName == prop.PropertyName && p.PropertyType == prop.PropertyType.RawType);
+
+            //    if (match == null)
+            //    {
+            //        match = _properties.FirstOrDefault(p => p.ElementType == null && p.PropertyName == null && p.PropertyType == prop.PropertyType.RawType);
+            //    }
+
+            //    if (match != null)
+            //    {
+            //        visitor.AddProperty(prop.PropertyType.RawType, prop.PropertyName, match.GetNewValue);
+            //    }
+
+            //    if (prop.PropertyType.IsSimpleType)
+            //    {
+            //        continue;
+            //    }
+
+            //    //If property type is not primitive, we will assume we should add it as an element/collection, but after it's being built and turns out it's 'empty', we will remove it.
+
+            //    if (prop.PropertyType.IsDictionary)
+            //    {
+            //        //TODO: Finish dictionary visit configuration once it's supported.
+            //    }
+            //    else if (prop.PropertyType.IsGenericEnumerable || prop.PropertyType.ImplementsGenericIEnumerable)
+            //    {
+            //        if (prop.PropertyType.IsCollectionItemsTypeSimple)
+            //        {
+            //            continue;
+            //        }
+
+            //        var childVisitor = visitor.AddCollection(prop.PropertyType.CollectionItemsType, prop.PropertyType.RawType, prop.PropertyName, prop.IsVisitorHierarchy);
+
+            //        if (childVisitor == null) //AddCollection() will return null in case of issues like circular reference.
+            //        {
+            //            continue;
+            //        }
+
+            //        Build(childVisitor, depth - 1);
+
+            //        if (!childVisitor.AnyElement && !!childVisitor.AnyCollection && !childVisitor.AnyProperty)
+            //        {
+            //            visitor.RemoveCollection(prop.PropertyType.RawType, prop.PropertyName);
+            //        }
+            //    }
+            //    else
+            //    {
+            //        var childVisitor = visitor.AddElement(prop.PropertyType.RawType, prop.PropertyName, prop.IsVisitorHierarchy);
+
+            //        if (childVisitor == null) //AddElement() will return null in case of issues like circular reference.
+            //        {
+            //            continue;
+            //        }
+
+            //        Build(childVisitor, depth - 1);
+
+            //        if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyProperty)
+            //        {
+            //            visitor.RemoveElement(prop.PropertyType.RawType, prop.PropertyName);
+            //        }
+            //    }
+            //}
+        
+        */
     }
 }
