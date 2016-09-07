@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.3.1.1</version>
+        <version>1.3.1.2</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -50,7 +50,7 @@ Read more on https://github.com/kopalite/ExpressWalker
       <summary>
 ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any property, basing on configuration. Uses refleciton only while building a visitor and relies purely on expression trees while visiting objects (Many thanks to Francisco José Rey Gozalo for contributing with ideas and solutions).
       </summary>
-        <releaseNotes>Performance improvement: TypeBuilder.Build() is now quicker when using types with many type-wise circular references. Use Build() overload with PropertyGuard parameter. Optimized up to build level 20.</releaseNotes>
+        <releaseNotes>Performance improvement: TypeBuilder.Build() is now quicker when using types with many type-wise circular references - You can 'guard:PropertyGuard' parameter. If your visitor should not clone objects, you should set parameter 'supportsCloning:bool' parameter to false (decreases build time drastically by omitting cloning expressions creation).</releaseNotes>
         <copyright>Ivan Kopcanski 2016</copyright>
         <language>en-US</language>
         <tags>ExpressWalker Expressions Visitor</tags>
