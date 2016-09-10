@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressWalker</id>
-        <version>1.3.1.3</version>
+        <version>1.4.0.2</version>
         <title>ExpressWalker</title>
         <authors>Ivan Kopcanski</authors>
         <owners>Ivan Kopcanski</owners>
@@ -10,7 +10,7 @@
         <projectUrl>https://github.com/kopalite/ExpressWalker</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>
-ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any object's property, basing on configuration. Uses reflection only while building a visitor and relies purely on expression trees while visiting objects. That's why IT IS WAY FASTER than custom solutions usually built with reflection.
+ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any object's property, basing on configuration. Relies purely on expression trees while visiting objects (uses reflection only once while building a visitor). That's why IT IS WAY FASTER than custom solutions usually built with reflection.
 
 It is optionally protected from circular references so you can avoid StackOverflowException easily. Provides fluent API while building a visitor which increases code readability in terms of recognizing the hierarchy being built right away from the code. Some of functionalities: are visiting properties by matching owner type and name (or only type), visiting through items in collecitons, specifying depth, custom expression for changing property value, cloning etc.
 	
@@ -20,11 +20,15 @@ It is optionally protected from circular references so you can avoid StackOverfl
                   .ForProperty&lt;Parent, string&gt;(p => p.TestString1, (old, met) => old + met)
                   .ForProperty&lt;Child, DateTime&gt;(p => p.TestDate1, (old, met) => old.AddYears(10))
                   .ForProperty&lt;CommonType&gt;((old, met) => new CommonType { CommonString = "..." })
-                  .Build();
-
+                  .Build(depth:10, guard:new PropertyGuard(), supportsCloning: true);
+				  
+	//guard is protection against type-wise circular references. supportsCloning = false improves build time.
+				  
   var parentClone = new Parent();
   var propertyValues = new HashSet&lt;PropertyValue&gt;()
-  typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
+  typeVisitor.Visit(parentObject, parentClone, depth:10, guard:new InstanceGuard(), values:propertyValues); 
+
+	//guard is protection against instance-wise circular references. values will hold flat list of new/old values.
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
@@ -38,7 +42,7 @@ It is optionally protected from circular references so you can avoid StackOverfl
 
   var parentClone = new A1();
   var propertyValues = new HashSet&lt;PropertyValue&gt;()
-  manualVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues);
+  manualVisitor.Visit(parentObject, parentClone, depth:10, guard:new InstanceGuard(), values:propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
