@@ -1,5 +1,5 @@
 # ExpressWalker
-ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any object's property, basing on configuration. Uses reflection only while building a visitor and relies purely on expression trees while visiting objects.
+ExpressWalker provides a generic way to examine and change any object graph in fashion similar to "Visitor Pattern". You can build generic hierarchy composition (visitor) capable to "visit" and change any object's property, basing on configuration. Relies purely on expression trees while visiting objects (uses reflection only once while building a visitor).
 
 That's why **IT IS WAY FASTER** than custom solutions usually built with reflection.
 
@@ -24,11 +24,13 @@ The optional and configurable things available are:
 						.ForProperty<Parent, string>(p => p.TestString1, (old, met) => old + met)
 						.ForProperty<Child, DateTime>(p => p.TestDate1, (old, met) => old.AddYears(10))
 						.ForProperty<CommonType>((old, met) => new CommonType { CommonString = "..." })
-					.Build();
+					.Build(depth:10, guard:new PropertyGuard(), supportsCloning: true);
+					
+	//guard is protection against type-wise circular references. supportsCloning = false improves build time.
 
     var parentClone = new Parent();
     var propertyValues = new HashSet<PropertyValue>()
-    typeVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues); 
+    typeVisitor.Visit(parentObject, parentClone, parentObject, parentClone, depth:10, guard:new InstanceGuard(), values:propertyValues); 
   
 //example 2 - IVisitor that visits properties by explicit configuration (start from ManualWalker class):
 
@@ -42,7 +44,7 @@ The optional and configurable things available are:
 
     var parentClone = new A1();
     var propertyValues = new HashSet<PropertyValue>()
-    manualVisitor.Visit(parentObject, parentClone, 10, new InstanceGuard(), propertyValues);
+    manualVisitor.Visit(parentObject, parentClone, parentObject, parentClone, depth:10, guard:new InstanceGuard(), values:propertyValues);
 			
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
