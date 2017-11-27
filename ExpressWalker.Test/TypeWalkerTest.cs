@@ -135,6 +135,57 @@ namespace ExpressWalker.Test
                             SomeString = "njenje"
                         }
                     }
+                }, 
+
+                //level0
+                DictionaryChild = new DictionaryChild()
+                {
+                    //level0
+                    TestDict = new Dictionary<int, ClassLevel1>()
+                    {
+                        {
+                            //level1
+                            1, new ClassLevel1
+                            {
+                                //level2                       
+                                ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                                SomeString = "njenje"
+                            }
+                        }
+                        ,
+                        {
+                            //level1
+                            2, new ClassLevel1
+                            {
+                                //level2    
+                                ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                                SomeString = "njenje"
+                            }
+                        }
+                    },
+                    //level0
+                    TestIDict = new Dictionary<int, ClassLevel1>()
+                    {
+                        {
+                            //level1
+                            1, new ClassLevel1
+                            {
+                                //level2                       
+                                ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                                SomeString = "njenje"
+                            }
+                        }
+                        ,
+                        {
+                            //level1
+                            2, new ClassLevel1
+                            {
+                                //level2    
+                                ClassLevel2 = new ClassLevel2{ TestCommonType = new CommonType { CommonString = "njunjnu" } },
+                                SomeString = "njenje"
+                            }
+                        }
+                    }
                 }
             };
 
@@ -143,6 +194,33 @@ namespace ExpressWalker.Test
             _blueprint = new Parent();
 
             _values = new HashSet<PropertyValue>();
+        }
+
+
+        [TestMethod]
+        public void TypeWalker_Visit_SimpleDict()
+        {
+            var bla = new Bla
+            {
+                Blas = new Dictionary<int, Bla1>
+                {
+                    { 1, new Bla1 { Test="t1" } },{ 2, new Bla1 { Test="t2" } }
+                }
+            };
+
+            var visitor = TypeWalker<Bla>.Create().ForProperty<Bla1, string>(b1 => b1.Test, (v, m) => "visited").Build(1);
+
+            visitor.Visit(bla, null, 1);
+        }
+
+        public class Bla
+        {
+            public Dictionary<int, Bla1> Blas { get; set; }
+        }
+
+        public class Bla1
+        {
+            public string Test { get; set; }
         }
 
         [TestMethod]
@@ -176,8 +254,6 @@ namespace ExpressWalker.Test
 
             Assert.IsTrue(isOk(_sample) && isOk(_blueprint) && _values.Count == 26);
         }
-
-        
 
         [TestMethod]
         public void TypeWalker_Visit_All_NullBlueprint()
@@ -342,7 +418,9 @@ namespace ExpressWalker.Test
         public CommonType CommonType1 { get; set; }
 
         public CollectionChild CollectionChild { get; set; }
-}
+
+        public DictionaryChild DictionaryChild { get; set; }
+    }
 
     public class Child
     {
@@ -390,6 +468,13 @@ namespace ExpressWalker.Test
         public ClassLevel1[]  TestArray{ get; set; }
 
         public object ReadOnly { get; }
+    }
+
+    public class DictionaryChild
+    {
+        public IDictionary<int, ClassLevel1> TestIDict { get; set; }
+
+        public Dictionary<int, ClassLevel1> TestDict { get; set; }
     }
 
     public class ClassLevel1

@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cloners\ArrayListCloner.cs" />
+    <Compile Include="Cloners\DictionaryCloner.cs" />
     <Compile Include="Cloners\CollectionInterfaceCloner.cs" />
     <Compile Include="Cloners\ListInterfaceCloner.cs" />
     <Compile Include="Cloners\[ClonerBase].cs" />
@@ -50,6 +51,7 @@
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\ReflectionCache.cs" />
     <Compile Include="Helpers\[Util].cs" />
+    <Compile Include="Visitors\DictionaryVisitor.cs" />
     <Compile Include="Visitors\CollectionVisitor.cs" />
     <Compile Include="Visitors\VisitorHierarchyAttribute.cs" />
     <Compile Include="Visitors\VisitorMetadataAttribute.cs" />

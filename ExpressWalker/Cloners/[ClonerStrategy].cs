@@ -20,6 +20,42 @@ namespace ExpressWalker.Cloners
         }
     }
 
+
+    internal class DictionaryStrategy : ClonerStrategy
+    {
+        public override int Priority { get { return 45; } }
+
+        public override bool IsMatch(Type elementType)
+        {
+            if (Util.IsSimpleType(elementType) || !Util.IsDictionary(elementType))
+            {
+                return false;
+            }
+
+            var keysType = Util.GetDictionaryKeysType(elementType);
+            if (keysType == null)
+            {
+                return false;
+            }
+
+            var itemsType = Util.GetDictionaryItemsType(elementType);
+            if (itemsType == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override ClonerBase GetCloner(Type elementType)
+        {
+            var keysType = Util.GetDictionaryKeysType(elementType);
+            var itemsType = Util.GetDictionaryItemsType(elementType);
+            return (ClonerBase)Create(typeof(DictionaryClonner<,,>), elementType, keysType, itemsType);
+        }
+    }
+
+    
     /// <summary>
     /// Makes cloner for collection type that has constructor accepting single parameter of type IEnumerable<T> (like List<T>).
     /// </summary>
@@ -34,7 +70,7 @@ namespace ExpressWalker.Cloners
                 return false;
             }
 
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             if (itemsType == null)
             {
                 return false;
@@ -46,7 +82,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return (ClonerBase)Create(typeof(ListCloner<,>), elementType, itemsType);
         }
     }
@@ -65,7 +101,7 @@ namespace ExpressWalker.Cloners
                 return false;
             }
 
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             if (itemsType == null)
             {
                 return false;
@@ -77,7 +113,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return (ClonerBase)Create(typeof(ListInterfaceCloner<>), itemsType);
         }
     }
@@ -97,7 +133,7 @@ namespace ExpressWalker.Cloners
                 return false;
             }
 
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             if (itemsType == null)
             {
                 return false;
@@ -109,7 +145,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return (ClonerBase)Create(typeof(CollectionClonner<,>), elementType, itemsType); 
         }
     }
@@ -128,7 +164,7 @@ namespace ExpressWalker.Cloners
                 return false;
             }
 
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             if (itemsType == null)
             {
                 return false;
@@ -140,7 +176,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return (ClonerBase)Create(typeof(CollectionInterfaceCloner<>), itemsType);
         }
     }
@@ -159,7 +195,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return new ArrayListClonner();
         }
     }
@@ -178,7 +214,7 @@ namespace ExpressWalker.Cloners
 
         public override ClonerBase GetCloner(Type elementType)
         {
-            var itemsType = Util.GetItemsType(elementType);
+            var itemsType = Util.GetCollectionItemsType(elementType);
             return (ClonerBase)Create(typeof(ArrayClonner<,>), elementType, itemsType);
         }
     }

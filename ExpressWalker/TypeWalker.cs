@@ -99,11 +99,32 @@ namespace ExpressWalker
 
                 if (Util.IsDictionary(property.PropertyType))
                 {
-                    //TODO: Finish dictionary visit configuration once it's supported.
+                    var dictionaryItemType = Util.GetDictionaryItemsType(property.PropertyType);
+
+                    if (Util.IsSimpleType(dictionaryItemType))
+                    {
+                        continue;
+                    }
+
+                    var isHierarchy = property.GetCustomAttribute<VisitorHierarchyAttribute>() != null;
+
+                    var childVisitor = visitor.AddDictionary(dictionaryItemType, property.PropertyType, property.Name, isHierarchy);
+
+                    if (childVisitor == null) //AddDirection() will return null in case of issues like circular reference.
+                    {
+                        continue;
+                    }
+
+                    Build(childVisitor, depth - 1);
+
+                    if (!childVisitor.AnyElement && !childVisitor.AnyCollection && !childVisitor.AnyDictionary && !childVisitor.AnyProperty)
+                    {
+                        visitor.RemoveDictionary(property.PropertyType, property.Name);
+                    }
                 }
                 else if (Util.IsGenericEnumerable(property.PropertyType) || Util.ImplementsGenericIEnumerable(property.PropertyType))
                 {
-                    var collectionItemType = Util.GetItemsType(property.PropertyType);
+                    var collectionItemType = Util.GetCollectionItemsType(property.PropertyType);
 
                     if (Util.IsSimpleType(collectionItemType))
                     {

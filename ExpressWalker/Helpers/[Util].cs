@@ -111,7 +111,7 @@ namespace ExpressWalker.Helpers
             return type.GetInterfaces().Any(IsGenericEnumerable);
         }
 
-        public static Type GetItemsType(Type type)
+        public static Type GetCollectionItemsType(Type type)
         {
             if (IsGenericEnumerable(type))
             {
@@ -119,7 +119,7 @@ namespace ExpressWalker.Helpers
             }
             else if (ImplementsGenericIEnumerable(type))
             {
-                return GetItemsType(type.GetInterfaces().FirstOrDefault(IsGenericEnumerable));
+                return GetCollectionItemsType(type.GetInterfaces().FirstOrDefault(IsGenericEnumerable));
             }
 
             return null;
@@ -131,7 +131,27 @@ namespace ExpressWalker.Helpers
 
         public static bool IsDictionary(Type type)
         {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+            return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Dictionary<,>) || type.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+        }
+
+        public static Type GetDictionaryKeysType(Type type)
+        {
+            if (IsDictionary(type))
+            {
+                return type.GenericTypeArguments.FirstOrDefault();
+            }
+
+            return null;
+        }
+
+        public static Type GetDictionaryItemsType(Type type)
+        {
+            if (IsDictionary(type))
+            {
+                return type.GenericTypeArguments.LastOrDefault();
+            }
+
+            return null;
         }
 
         #endregion
@@ -152,6 +172,22 @@ namespace ExpressWalker.Helpers
         }
 
         public static ConstructorInfo GetCollectionCtor(Type type, Type ctorParamType)
+        {
+            Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
+            return type.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
+                                                             (IsGenericEnumerable(getParameterType(c)) ||
+                                                              ImplementsGenericIEnumerable(getParameterType(c))));
+        }
+
+        public static bool HasDictionaryCtor(Type type, Type ctorParamType)
+        {
+            Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
+            return type.GetConstructors().Any(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&
+                                                   (IsGenericEnumerable(getParameterType(c)) ||
+                                                    ImplementsGenericIEnumerable(getParameterType(c))));
+        }
+
+        public static ConstructorInfo GetDictionaryCtor(Type type, Type ctorParamType)
         {
             Func<ConstructorInfo, Type> getParameterType = c => c.GetParameters().First().ParameterType;
             return type.GetConstructors().FirstOrDefault(c => c.GetParameters().Length == 1 && getParameterType(c).Equals(ctorParamType) &&

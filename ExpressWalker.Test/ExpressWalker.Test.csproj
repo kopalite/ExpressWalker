@@ -55,6 +55,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ClonerDictionaryTest.cs" />
     <Compile Include="ClonerStrategyTest.cs" />
     <Compile Include="ExpressAccessorTest.cs" />
     <Compile Include="ClonerCollectionTest.cs" />

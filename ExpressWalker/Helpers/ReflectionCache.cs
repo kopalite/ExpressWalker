@@ -90,7 +90,7 @@ namespace ExpressWalker.Helpers
 
             ImplementsGenericIEnumerable = Util.ImplementsGenericIEnumerable(type);
 
-            CollectionItemsType = Util.GetItemsType(type);
+            CollectionItemsType = Util.GetCollectionItemsType(type);
 
             if (CollectionItemsType != null)
             {

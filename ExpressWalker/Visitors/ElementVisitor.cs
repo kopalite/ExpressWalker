@@ -20,6 +20,8 @@ namespace ExpressWalker
 
         public abstract bool AnyCollection { get; }
 
+        public abstract bool AnyDictionary { get; }
+
         public abstract bool AnyProperty { get; }
 
         public abstract ElementVisitor AddElement(Type elementType, string childElementName, bool isHierarchy);
@@ -29,6 +31,10 @@ namespace ExpressWalker
         public abstract ElementVisitor AddCollection(Type elementType, Type collectionType, string collectionName, bool isHierarchy);
 
         public abstract void RemoveCollection(Type collectionType, string collectionName);
+
+        public abstract ElementVisitor AddDictionary(Type elementType, Type dictionaryType, string dictionaryName, bool isHierarchy);
+
+        public abstract void RemoveDictionary(Type dictionaryType, string dictionaryName);
 
         //getNewValue is convertible to Expression<Func<TPropertyType, TPropertyType>> where TPropertyType is specified in derived class.
         public abstract ElementVisitor AddProperty(Type propertyType, string propertyName,  Expression getNewValue);
@@ -44,9 +50,9 @@ namespace ExpressWalker
 
         protected HashSet<IElementVisitor> _collectionVisitors;
 
-        protected HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
+        protected HashSet<IElementVisitor> _dictionaryVisitors;
 
-        
+        protected HashSet<IPropertyVisitor<TElement>> _propertyVisitors;
 
         public override Type ElementType { get { return typeof(TElement); } }
 
@@ -55,6 +61,8 @@ namespace ExpressWalker
         public override bool AnyElement { get { return _elementVisitors.Any(); } }
 
         public override bool AnyCollection { get { return _collectionVisitors.Any(); } }
+
+        public override bool AnyDictionary { get { return _dictionaryVisitors.Any(); } }
 
         public override bool AnyProperty { get { return _propertyVisitors.Any(); } }
 
@@ -67,6 +75,8 @@ namespace ExpressWalker
             _elementVisitors = new HashSet<IElementVisitor>();
 
             _collectionVisitors = new HashSet<IElementVisitor>();
+
+            _dictionaryVisitors = new HashSet<IElementVisitor>();
 
             _propertyVisitors = new HashSet<IPropertyVisitor<TElement>>();
 
@@ -225,6 +235,48 @@ namespace ExpressWalker
                     }
                 }
             }
+
+            //Visiting dictionaries.
+
+            foreach (var dictionaryVisitor in _dictionaryVisitors)
+            {
+                var childDictionary = (IEnumerable)dictionaryVisitor.Extract(element);
+
+                IEnumerable childDictionaryBlueprint = null;
+
+                if (blueprint != null)
+                {
+                    childDictionaryBlueprint = (IEnumerable)dictionaryVisitor.SetCopy(blueprint, childDictionary);
+                }
+
+                if (childDictionary == null)
+                {
+                    continue;
+                }
+
+                var originalEnumerator = childDictionary.GetEnumerator();
+                var blueprintEnumerator = childDictionaryBlueprint != null ? childDictionaryBlueprint.GetEnumerator() : null;
+
+                if (blueprintEnumerator != null)
+                {
+                    while (originalEnumerator.MoveNext() && blueprintEnumerator.MoveNext())
+                    {
+                        var originalElement = originalEnumerator.Current;
+                        var blueprintElement = blueprintEnumerator.Current;
+
+                        dictionaryVisitor.Visit(originalElement, blueprintElement, depth - 1, guard, values);
+                    }
+                }
+                else
+                {
+                    while (originalEnumerator.MoveNext())
+                    {
+                        var originalElement = originalEnumerator.Current;
+
+                        dictionaryVisitor.Visit(originalElement, null, depth - 1, guard, values);
+                    }
+                }
+            }
         }
     }
 
@@ -289,7 +341,7 @@ namespace ExpressWalker
         internal IElementVisitor<TChildElement> AddCollectionVisitor<TChildElement>(Type collectionType, string collectionName, bool isHierarchy)
         {
             var childElementType = typeof(TChildElement);
-            var itemsType = Util.GetItemsType(childElementType);
+            var itemsType = Util.GetCollectionItemsType(childElementType);
 
             if (_collectionVisitors.Any(ev => ev.ElementType == itemsType && ev.ElementName == collectionName))
             {
@@ -325,7 +377,7 @@ namespace ExpressWalker
 
         internal void RemoveCollectionVisitor<TChildElement>(string collectionName)
         {
-            var itemsType = Util.GetItemsType(typeof(TChildElement));
+            var itemsType = Util.GetCollectionItemsType(typeof(TChildElement));
             var collectionVisitor = _collectionVisitors.FirstOrDefault(ev => ev.ElementType == itemsType && ev.ElementName == collectionName);
             if (collectionVisitor == null)
             {
@@ -339,6 +391,61 @@ namespace ExpressWalker
             var methodDef = RemoveCollectionVisitorMethod;
             var method = methodDef.MakeGenericMethod(elementType);
             method.Invoke(this, new[] { collectionName });
+        }
+
+        internal IElementVisitor<TChildElement> AddDictionaryVisitor<TChildElement>(Type dictionaryType, string dictionaryName, bool isHierarchy)
+        {
+            var childElementType = typeof(TChildElement);
+            var itemsType = Util.GetDictionaryItemsType(childElementType);
+
+            if (_dictionaryVisitors.Any(ev => ev.ElementType == itemsType && ev.ElementName == dictionaryName))
+            {
+                throw new ArgumentException(string.Format("Dictionary visitor for type '{0}' and name '{1}' is already added!", typeof(TElement), dictionaryName));
+            }
+
+            PropertyGuard guard = null;
+            if (Guard != null)
+            {
+                //If circular reference between properties is detected, we will return null as a sign that we cannot continue cycling ([VisitorHierarchy] is suppressing it).
+
+                if (!isHierarchy && Guard.IsRepeating(childElementType, dictionaryName))
+                {
+                    return null;
+                }
+
+                guard = Guard.Copy();
+                guard.Add(childElementType, dictionaryName);
+            }
+
+            var dictionaryVisitor = new DictionaryVisitor<TChildElement>(typeof(TElement), dictionaryType, dictionaryName, guard, SupportsCloning);
+            _dictionaryVisitors.Add(dictionaryVisitor);
+            return dictionaryVisitor;
+        }
+
+        public override ElementVisitor AddDictionary(Type elementType, Type dictionaryType, string dictionaryName, bool isHierarchy)
+        {
+            var methodDef = AddDictionaryVisitorMethod;
+            var method = methodDef.MakeGenericMethod(elementType);
+            var visitor = (ElementVisitor)method.Invoke(this, new object[] { dictionaryType, dictionaryName, isHierarchy });
+            return visitor;
+        }
+
+        internal void RemoveDictionaryVisitor<TChildElement>(string dictionaryName)
+        {
+            var itemsType = Util.GetDictionaryItemsType(typeof(TChildElement));
+            var dictionaryVisitor = _dictionaryVisitors.FirstOrDefault(ev => ev.ElementType == itemsType && ev.ElementName == dictionaryName);
+            if (dictionaryVisitor == null)
+            {
+                throw new ArgumentException(string.Format("Dictionary visitor for type '{0}' and name '{1}' is not found!", typeof(TElement), dictionaryName));
+            }
+            _dictionaryVisitors.Remove(dictionaryVisitor);
+        }
+
+        public override void RemoveDictionary(Type elementType, string dictionaryName)
+        {
+            var methodDef = RemoveDictionaryVisitorMethod;
+            var method = methodDef.MakeGenericMethod(elementType);
+            method.Invoke(this, new[] { dictionaryName });
         }
 
         internal IElementVisitor<TElement> AddPropertyVisitor<TProperty>(string propertyName, Expression<Func<TProperty, object, TProperty>> getNewValue)
@@ -382,6 +489,12 @@ namespace ExpressWalker
 
         private static MethodInfo _removeCollectionVisitorMethod;
         private static MethodInfo RemoveCollectionVisitorMethod { get { return _removeCollectionVisitorMethod ?? (_removeCollectionVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("RemoveCollectionVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _addDictionaryVisitorMethod;
+        private static MethodInfo AddDictionaryVisitorMethod { get { return _addDictionaryVisitorMethod ?? (_addDictionaryVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("AddDictionaryVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
+
+        private static MethodInfo _removeDictionaryVisitorMethod;
+        private static MethodInfo RemoveDictionaryVisitorMethod { get { return _removeDictionaryVisitorMethod ?? (_removeDictionaryVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("RemoveDictionaryVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
 
         private static MethodInfo _addPropertyVisitorMethod;
         private static MethodInfo AddPropertyVisitorMethod { get { return _addPropertyVisitorMethod ?? (_addPropertyVisitorMethod = typeof(ElementVisitor<TElement>).GetMethod("AddPropertyVisitor", BindingFlags.NonPublic | BindingFlags.Instance)); } }
