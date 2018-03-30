@@ -47,12 +47,15 @@
     <Compile Include="Cloners\InstanceCloner.cs" />
     <Compile Include="Cloners\ArrayCloner.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Factories\IVisitorsFactory.cs" />
+    <Compile Include="Factories\VisitorsFactory.cs" />
     <Compile Include="Helpers\PropertyGuard.cs" />
     <Compile Include="Helpers\InstanceGuard.cs" />
     <Compile Include="Helpers\ReflectionCache.cs" />
     <Compile Include="Helpers\[Util].cs" />
     <Compile Include="Visitors\DictionaryVisitor.cs" />
     <Compile Include="Visitors\CollectionVisitor.cs" />
+    <Compile Include="Visitors\IDictionaryVisitor.cs" />
     <Compile Include="Visitors\VisitorHierarchyAttribute.cs" />
     <Compile Include="Visitors\VisitorMetadataAttribute.cs" />
     <Compile Include="Helpers\ExpressAccessor.cs" />

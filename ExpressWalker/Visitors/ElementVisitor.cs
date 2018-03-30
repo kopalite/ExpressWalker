@@ -238,7 +238,7 @@ namespace ExpressWalker
 
             //Visiting dictionaries.
 
-            foreach (var dictionaryVisitor in _dictionaryVisitors)
+            foreach (IDictionaryVisitor dictionaryVisitor in _dictionaryVisitors)
             {
                 var childDictionary = (IEnumerable)dictionaryVisitor.Extract(element);
 
@@ -261,8 +261,8 @@ namespace ExpressWalker
                 {
                     while (originalEnumerator.MoveNext() && blueprintEnumerator.MoveNext())
                     {
-                        var originalElement = originalEnumerator.Current;
-                        var blueprintElement = blueprintEnumerator.Current;
+                        var originalElement = dictionaryVisitor.KeyValueAccessor.Get(originalEnumerator.Current);
+                        var blueprintElement = dictionaryVisitor.KeyValueAccessor.Get(blueprintEnumerator.Current);
 
                         dictionaryVisitor.Visit(originalElement, blueprintElement, depth - 1, guard, values);
                     }
@@ -271,7 +271,7 @@ namespace ExpressWalker
                 {
                     while (originalEnumerator.MoveNext())
                     {
-                        var originalElement = originalEnumerator.Current;
+                        var originalElement = dictionaryVisitor.KeyValueAccessor.Get(originalEnumerator.Current);
 
                         dictionaryVisitor.Visit(originalElement, null, depth - 1, guard, values);
                     }

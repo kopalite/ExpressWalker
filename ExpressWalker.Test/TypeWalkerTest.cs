@@ -210,7 +210,10 @@ namespace ExpressWalker.Test
 
             var visitor = TypeWalker<Bla>.Create().ForProperty<Bla1, string>(b1 => b1.Test, (v, m) => "visited").Build(1);
 
+           
             visitor.Visit(bla, null, 1);
+
+            Assert.IsTrue(bla.Blas[1].Test == "visited" && bla.Blas[2].Test == "visited");
         }
 
         public class Bla

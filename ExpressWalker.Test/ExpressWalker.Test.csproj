@@ -66,6 +66,7 @@
     <Compile Include="StressTest.cs" />
     <Compile Include="TypeWalkerTest.cs" />
     <Compile Include="UtilTest.cs" />
+    <Compile Include="VisitorsFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExpressWalker\ExpressWalker.csproj">

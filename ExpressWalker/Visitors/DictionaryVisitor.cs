@@ -1,9 +1,10 @@
 ﻿using ExpressWalker.Cloners;
 using System;
+using System.Collections.Generic;
 
 namespace ExpressWalker.Visitors
 {
-    internal sealed class DictionaryVisitor<TElement> : ElementVisitor<TElement>
+    internal sealed class DictionaryVisitor<TElement> : ElementVisitor<TElement>, IDictionaryVisitor
     {
         public DictionaryVisitor(Type ownerType, 
                                  Type dictionaryType, 
@@ -22,6 +23,13 @@ namespace ExpressWalker.Visitors
             {
                 _elementCloner = ClonerBase.Create(dictionaryType);
             }
+
+            var keyType = dictionaryType.GenericTypeArguments[0];
+            var valueType = dictionaryType.GenericTypeArguments[1];
+            var kvpType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+            KeyValueAccessor = ExpressAccessor.Create(kvpType, valueType, "Value");
         }
+
+        public ExpressAccessor KeyValueAccessor { get; private set; }
     }
 }
