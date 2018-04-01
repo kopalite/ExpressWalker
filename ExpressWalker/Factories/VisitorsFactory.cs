@@ -13,9 +13,9 @@ namespace ExpressWalker.Factories
     {
         private readonly List<WalkerSettings> _settings;
 
-        private readonly Dictionary<VisitorKey, IVisitor> _visitors;
+        private WalkerSettings _currentSettings;
 
-        private string _category;
+        private readonly Dictionary<VisitorKey, IVisitor> _visitors;
 
         private bool _isLocked;
 
@@ -23,12 +23,22 @@ namespace ExpressWalker.Factories
         {
             _settings = new List<WalkerSettings>();
 
+
             _visitors = new Dictionary<VisitorKey, IVisitor>();
         }
 
-        public IVisitorsFactory Category(string category)
+        public IVisitorsFactory WithSettings(string name, int depth = Constants.MaxDepth, bool usePropertyGuard = false, bool supportsCloning = true)
         {
-            _category = category;
+            var settings = _settings.FirstOrDefault(x => x.Name == name);
+
+            if (settings == null)
+            {
+                settings = new WalkerSettings(name, depth, usePropertyGuard, supportsCloning);
+
+                _settings.Add(settings);
+            }
+
+            _currentSettings = settings;
 
             return this;
         }
@@ -40,16 +50,12 @@ namespace ExpressWalker.Factories
                 throw new Exception("Factory can only be set before calling GetVisitor() method!");
             }
 
-            var category = _category ?? "default";
-
-            if (!_settings.Any(x => x.Category == category))
+            if (_currentSettings == null)
             {
-                _settings.Add(new WalkerSettings(category));
+                throw new Exception("Please specify the visitors settings by calling WithSettings() method first!");
             }
 
-            var settings = _settings.First(x => x.Category == category);
-
-            settings.ForProperty(getNewValue);
+            _currentSettings.ForProperty(getNewValue);
 
             return this;
         }
@@ -61,34 +67,30 @@ namespace ExpressWalker.Factories
                 throw new Exception("Factory can only be set before calling GetVisitor() method!");
             }
 
-            var category = _category ?? "default";
-
-            if (!_settings.Any(x => x.Category == category))
+            if (_currentSettings == null)
             {
-                _settings.Add(new WalkerSettings(category));
+                throw new Exception("Please specify the visitors settings by calling WithSettings() method first!");
             }
 
-            var settings = _settings.First(x => x.Category == category);
-
-            settings.ForProperty(propertyName, getNewValue);
+            _currentSettings.ForProperty(propertyName, getNewValue);
 
             return this;
         }
 
-        public IVisitor GetVisitor(string category, Type type)
+        public IVisitor GetVisitor(string name, Type type)
         {
             _isLocked = true;
 
-            var visitorKey = new VisitorKey(category, type);
+            var visitorKey = new VisitorKey(name, type);
             if (_visitors.ContainsKey(visitorKey))
             {
                 return _visitors[visitorKey];
             }
 
-            var settings = _settings.FirstOrDefault(x => x.Category == category);
+            var settings = _settings.FirstOrDefault(x => x.Name == name);
             if (settings == null)
             {
-                throw new Exception("Visitors category '{0}' is not being set in visitors factory. It can be set by using one of .ForProperty() methods before asking for visitors.");
+                throw new Exception("Visitors settings with name '{0}' is not being set in visitors factory. It can be set by calling .WithSettings() method before asking for visitors.");
             }
 
             var visitor = settings.GetVisitor(type);
@@ -99,14 +101,12 @@ namespace ExpressWalker.Factories
 
     internal struct VisitorKey
     {
-        private readonly string _category;
-
+        private readonly string _name;
         private readonly Type _type;
 
-        public VisitorKey(string category, Type type)
+        public VisitorKey(string name, Type type)
         {
-            _category = category;
-
+            _name = name;
             _type = type;
         }
     }
@@ -115,13 +115,19 @@ namespace ExpressWalker.Factories
     {
         private List<Action<dynamic>> _walkerActions;
 
-        public string Category { get; private set; }
+        public string Name { get; private set; }
+        public int Depth { get; private set; }
+        public bool UsePropertyGuard { get; private set; }
+        public bool SupportsCloning { get; private set; }
 
-        public WalkerSettings(string category)
+        public WalkerSettings(string name, int depth, bool usePropertyGuard, bool supportsCloning)
         {
             _walkerActions = new List<Action<dynamic>>();
 
-            Category = category;
+            Name = name;
+            Depth = depth;
+            UsePropertyGuard = usePropertyGuard;
+            SupportsCloning = supportsCloning;
         }
 
         public void ForProperty<TPropertyType>(Expression<Func<TPropertyType, object, TPropertyType>> getNewValue)
@@ -147,7 +153,7 @@ namespace ExpressWalker.Factories
         {
             var walker = TypeWalker<TRootType>.Create();
             _walkerActions.ForEach(x => x(walker));
-            return walker.Build();
+            return walker.Build(Depth, UsePropertyGuard ? new PropertyGuard() : null, SupportsCloning);
         }
     }
 }

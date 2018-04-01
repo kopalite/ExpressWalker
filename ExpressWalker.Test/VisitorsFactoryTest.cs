@@ -12,14 +12,14 @@ namespace ExpressWalker.Test
         [TestInitialize]
         public void Initialize()
         {
-            _factory = new VisitorsFactory().Category("default")
+            _factory = new VisitorsFactory().WithSettings("default")
                                                 .ForProperty<int>((val, met) => 2)
-                                            .Category("category2")
+                                            .WithSettings("name2")
                                                 .ForProperty<ForFact2, string>( x => x.Name, (val, met) => "visited");
         }
 
         [TestMethod]
-        public void Factory_Category_Default()
+        public void Factory_Name_Default()
         {
             //Act
             var defaultVisitor = _factory.GetVisitor("default", typeof(ForFact1));
@@ -29,20 +29,20 @@ namespace ExpressWalker.Test
         }
 
         [TestMethod]
-        public void Factory_Category_Cat2()
+        public void Factory_Name_Name2()
         {
             //Act
-            var defaultVisitor = _factory.GetVisitor("category2", typeof(ForFact2));
+            var defaultVisitor = _factory.GetVisitor("name2", typeof(ForFact2));
 
             //Assert
             Assert.IsNotNull(defaultVisitor);
         }
 
         [TestMethod, ExpectedException(typeof(Exception))]
-        public void Factory_Category_Unknown()
+        public void Factory_Name_Unknown()
         {
             //Act
-            var defaultVisitor = _factory.GetVisitor("category6", typeof(ForFact2));
+            var defaultVisitor = _factory.GetVisitor("name6", typeof(ForFact2));
 
             //Assert
             Assert.IsNotNull(defaultVisitor);
@@ -64,10 +64,10 @@ namespace ExpressWalker.Test
         }
 
         [TestMethod]
-        public void Factory_Visitor_Cat2()
+        public void Factory_Visitor_Name2()
         {
             //Arrange
-            var cat2Visitor = _factory.GetVisitor("category2", typeof(ForFact1));
+            var cat2Visitor = _factory.GetVisitor("name2", typeof(ForFact1));
             var x = new ForFact1 { Id = 1, Fact2 = new ForFact2 { Name = "..." } };
 
             //act
@@ -82,8 +82,8 @@ namespace ExpressWalker.Test
         public void Factory_Visitor_Cache()
         {
             //act
-            var cat2Visitor1 = _factory.GetVisitor("category2", typeof(ForFact1));
-            var cat2Visitor2 = _factory.GetVisitor("category2", typeof(ForFact1));
+            var cat2Visitor1 = _factory.GetVisitor("name2", typeof(ForFact1));
+            var cat2Visitor2 = _factory.GetVisitor("name2", typeof(ForFact1));
             
             //Assert
             Assert.IsTrue(cat2Visitor1 == cat2Visitor2);
