@@ -49,6 +49,22 @@ The optional and configurable things available are:
 //Paremeter 'met' in expressions above is optional metadata object set in design-time. 
 //It can be set by [VisitorMetadata] property attribute in visited class.
 //e.g. in example above, there is [VisitorMetadata("AnyString")] on property Parent.TestString1.
+
+//example 3 - IVisitor built and cached using the IVisitorsFactory:
+//scenario for visitors of same settings built for different types:
+  
+  var factory = new VisitorsFactory().WithSettings("name1", depth:5, usePropertyGuard:false, supportsCloning:false)
+                                       .ForProperty&lt;int&gt;((val, met) => 2)
+                                     .WithSettings("name6")
+                                       .ForProperty&lt;Parent, string&gt;( x => x.Name, (val, met) => "t");
+									 
+  var visitor1 = factory.GetVisitor("name1", typeof(Class1));
+  var visitor1a = factory.GetVisitor("name1", typeof(Class1));
+  var visitor2 = factory.GetVisitor("name1", typeof(Class2));
+  var visitor6 = factory.GetVisitor("name6", typeof(Class6));
+  
+//visitor1 == visitor1a --true
+//visitor1 == visitor2 --false	 
 			
 ```
 
