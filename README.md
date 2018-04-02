@@ -54,9 +54,9 @@ The optional and configurable things available are:
 //scenario for visitors of same settings built for different types:
   
   var factory = new VisitorsFactory().WithSettings("name1", depth:5, usePropertyGuard:false, supportsCloning:false)
-                                       .ForProperty&lt;int&gt;((val, met) => 2)
+                                       .ForProperty<int>((val, met) => 2)
                                      .WithSettings("name6")
-                                       .ForProperty&lt;Parent, string&gt;( x => x.Name, (val, met) => "t");
+                                       .ForProperty<Parent, string>( x => x.Name, (val, met) => "t");
 									 
   var visitor1 = factory.GetVisitor("name1", typeof(Class1));
   var visitor1a = factory.GetVisitor("name1", typeof(Class1));
